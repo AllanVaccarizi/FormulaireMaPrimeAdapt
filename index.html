@@ -51,7 +51,7 @@
             }
 
             .simulator-header {
-                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                background: linear-gradient(135deg, #95cd93 0%, #7db87a 100%);
                 color: white;
                 text-align: center;
                 padding: 25px 20px;
@@ -239,40 +239,6 @@
                 background: linear-gradient(135deg, #e74c3c, #c0392b);
             }
 
-            .simulator-ineligible-message {
-                display: none;
-                text-align: center;
-                padding: 25px;
-                background: linear-gradient(135deg, #e74c3c, #c0392b);
-                color: white;
-                border-radius: 10px;
-                margin-top: 20px;
-                animation: simulatorFadeIn 0.5s ease-in;
-            }
-
-            .simulator-ineligible-message.show {
-                display: block;
-            }
-
-            .simulator-ineligible-message h3 {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-
-            .simulator-ineligible-message p {
-                font-size: 14px;
-                line-height: 1.4;
-                margin-bottom: 10px;
-            }
-
-            .simulator-ineligible-message .alternative-info {
-                background: rgba(255,255,255,0.1);
-                padding: 15px;
-                border-radius: 8px;
-                margin-top: 15px;
-                font-size: 13px;
-            }
-
             .simulator-result h3 {
                 font-size: 20px;
                 margin-bottom: 15px;
@@ -313,7 +279,7 @@
         const simulatorHTML = `
             <div class="maprimeadapt-simulator">
                 <div class="simulator-header">
-                    <h2>🏠 Simulateur MaPrimeAdapt</h2>
+                    <h2>Simulateur MaPrimeAdapt</h2>
                     <p>Découvrez votre éligibilité et le montant de votre aide en 2 minutes</p>
                 </div>
                 
@@ -325,29 +291,29 @@
                     <form class="simulator-form">
                         <!-- Question 1 -->
                         <div class="simulator-question active" data-question="1">
-                            <h3 class="simulator-question-title">🏠 Votre logement</h3>
+                            <h3 class="simulator-question-title">Votre logement</h3>
                             <p class="simulator-question-subtitle">Votre projet concerne-t-il votre résidence principale ?</p>
                             <div class="simulator-options">
-                                <div class="simulator-option" data-value="oui">✅ Oui</div>
-                                <div class="simulator-option" data-value="non">❌ Non</div>
+                                <div class="simulator-option" data-value="oui">Oui</div>
+                                <div class="simulator-option" data-value="non">Non</div>
                             </div>
                         </div>
 
                         <!-- Question 2 -->
                         <div class="simulator-question" data-question="2">
-                            <h3 class="simulator-question-title">🏠 Statut d'occupation</h3>
+                            <h3 class="simulator-question-title">Statut d'occupation</h3>
                             <p class="simulator-question-subtitle">Concernant ce logement, vous êtes :</p>
                             <div class="simulator-options">
-                                <div class="simulator-option" data-value="proprietaire">🏠 Propriétaire occupant</div>
-                                <div class="simulator-option" data-value="locataire_prive">🏠 Locataire - logement privé</div>
-                                <div class="simulator-option" data-value="locataire_social">🏠 Locataire - logement social</div>
-                                <div class="simulator-option" data-value="autre">🏠 Autre situation</div>
+                                <div class="simulator-option" data-value="proprietaire">Propriétaire occupant</div>
+                                <div class="simulator-option" data-value="locataire_prive">Locataire - logement privé</div>
+                                <div class="simulator-option" data-value="locataire_social">Locataire - logement social</div>
+                                <div class="simulator-option" data-value="autre">Autre situation</div>
                             </div>
                         </div>
 
                         <!-- Question 3 -->
                         <div class="simulator-question" data-question="3">
-                            <h3 class="simulator-question-title">👤 Votre âge</h3>
+                            <h3 class="simulator-question-title">Votre âge</h3>
                             <p class="simulator-question-subtitle">Quel âge avez-vous ?</p>
                             <div class="simulator-options">
                                 <div class="simulator-option" data-value="moins_60">Moins de 60 ans</div>
@@ -358,18 +324,18 @@
 
                         <!-- Question 4 -->
                         <div class="simulator-question" data-question="4">
-                            <h3 class="simulator-question-title">♿ Situation de handicap</h3>
+                            <h3 class="simulator-question-title">Situation de handicap</h3>
                             <p class="simulator-question-subtitle">Êtes-vous en situation de handicap ?</p>
                             <div class="simulator-options">
-                                <div class="simulator-option" data-value="oui">✅ Oui (taux ≥ 50% ou PCH)</div>
-                                <div class="simulator-option" data-value="non">❌ Non</div>
-                                <div class="simulator-option" data-value="ne_sais_pas">❓ Je ne sais pas</div>
+                                <div class="simulator-option" data-value="oui">Oui (taux ≥ 50% ou PCH)</div>
+                                <div class="simulator-option" data-value="non">Non</div>
+                                <div class="simulator-option" data-value="ne_sais_pas">Je ne sais pas</div>
                             </div>
                         </div>
 
                         <!-- Question 5 -->
                         <div class="simulator-question" data-question="5">
-                            <h3 class="simulator-question-title">👥 Votre foyer</h3>
+                            <h3 class="simulator-question-title">Votre foyer</h3>
                             <div class="simulator-input-group">
                                 <label for="sim-codePostal">Code postal :</label>
                                 <input type="text" id="sim-codePostal" maxlength="5" placeholder="69000" required>
@@ -389,7 +355,7 @@
 
                         <!-- Question 6 -->
                         <div class="simulator-question" data-question="6">
-                            <h3 class="simulator-question-title">💰 Vos revenus</h3>
+                            <h3 class="simulator-question-title">Vos revenus</h3>
                             <p class="simulator-question-subtitle">Revenu fiscal de référence total du foyer :</p>
                             <div class="simulator-options">
                                 <div class="simulator-option" data-value="moins_20000">Moins de 20 000€</div>
@@ -401,20 +367,20 @@
 
                         <!-- Question 7 -->
                         <div class="simulator-question" data-question="7">
-                            <h3 class="simulator-question-title">🔧 Votre projet</h3>
+                            <h3 class="simulator-question-title">Votre projet</h3>
                             <p class="simulator-question-subtitle">Quels travaux envisagez-vous ? (Sélection multiple possible)</p>
                             <div class="simulator-options">
-                                <div class="simulator-option" data-value="douche">🚿 Douche de plain-pied</div>
-                                <div class="simulator-option" data-value="monte_escalier">🪜 Monte-escalier</div>
-                                <div class="simulator-option" data-value="barres_appui">🛡️ Barres d'appui</div>
-                                <div class="simulator-option" data-value="rampes">🏠 Rampes d'accès</div>
-                                <div class="simulator-option" data-value="a_definir">🤷 À définir</div>
+                                <div class="simulator-option" data-value="douche">Douche de plain-pied</div>
+                                <div class="simulator-option" data-value="monte_escalier">Monte-escalier</div>
+                                <div class="simulator-option" data-value="barres_appui">Barres d'appui</div>
+                                <div class="simulator-option" data-value="rampes">Rampes d'accès</div>
+                                <div class="simulator-option" data-value="a_definir">À définir</div>
                             </div>
                         </div>
 
                         <!-- Question 8 -->
                         <div class="simulator-question" data-question="8">
-                            <h3 class="simulator-question-title">📧 Recevez votre estimation</h3>
+                            <h3 class="simulator-question-title">Recevez votre estimation</h3>
                             <p class="simulator-question-subtitle">Remplissez ce formulaire pour recevoir votre estimation par email</p>
                             <div class="simulator-input-group">
                                 <label for="sim-prenom">Prénom :</label>
@@ -434,30 +400,14 @@
                             </div>
                         </div>
 
-                        <!-- Message d'inéligibilité -->
-                        <div class="simulator-ineligible-message">
-                            <h3>Désolé, vous n'êtes pas éligible à MaPrimeAdapt</h3>
-                            <div class="simulator-ineligible-reason"></div>
-                            <div class="alternative-info">
-                                <strong>💡 Alternatives possibles :</strong><br>
-                                • Crédit d'impôt pour l'accessibilité<br>
-                                • Aides locales de votre commune<br>
-                                • Aides des caisses de retraite<br>
-                                • Prêt à l'amélioration de l'habitat
-                            </div>
-                            <p style="margin-top: 15px;">
-                                📞 <strong>Contactez-nous</strong> pour étudier d'autres solutions de financement adaptées à votre situation.
-                            </p>
-                        </div>
-
                         <!-- Résultat -->
                         <div class="simulator-result">
-                            <h3>🎯 Votre estimation MaPrimeAdapt</h3>
+                            <h3>Votre estimation MaPrimeAdapt</h3>
                             <div class="simulator-result-amount">Calcul en cours...</div>
                             <div class="simulator-result-details"></div>
                             <p style="margin-top: 15px; font-size: 14px;">
-                                📧 Estimation détaillée envoyée par email<br>
-                                📞 Nos conseillers vous contacteront sous 24h
+                                Estimation détaillée envoyée par email<br>
+                                Nos conseillers vous contacteront sous 24h
                             </p>
                         </div>
 
@@ -560,10 +510,6 @@
 
             nextQuestion() {
                 if (!this.validateCurrentQuestion()) {
-                    return;
-                }
-
-                if (!this.checkEligibility()) {
                     return;
                 }
 
@@ -722,123 +668,40 @@
             checkEligibility() {
                 // Check residence principale
                 if (this.responses.question_1 === 'non') {
-                    this.showIneligibilityMessage(
-                        'Résidence secondaire',
-                        'MaPrimeAdapt ne concerne que les résidences principales.',
-                        'Pour adapter une résidence secondaire, vous pouvez vous tourner vers :<br>• Le crédit d\'impôt pour l\'accessibilité<br>• Les aides locales de votre commune<br>• Un financement privé'
-                    );
-                    return false;
+                    return {
+                        eligible: false,
+                        reason: 'Le projet ne concerne pas votre résidence principale'
+                    };
                 }
 
                 // Check statut occupation
                 if (this.responses.question_2 === 'locataire_social') {
-                    this.showIneligibilityMessage(
-                        'Logement social',
-                        'MaPrimeAdapt ne concerne que les propriétaires occupants et locataires du parc privé.',
-                        'Pour un logement social, contactez :<br>• Votre bailleur social<br>• Le service social de votre mairie<br>• Les associations d\'aide aux personnes âgées'
-                    );
-                    return false;
+                    return {
+                        eligible: false,
+                        reason: 'MaPrimeAdapt ne concerne pas les logements sociaux'
+                    };
                 }
 
                 // Check age and handicap
                 if (this.responses.question_3 === 'moins_60' && this.responses.question_4 === 'non') {
-                    this.showIneligibilityMessage(
-                        'Critères d\'âge et de handicap',
-                        'Pour être éligible à MaPrimeAdapt, vous devez avoir au moins 60 ans ou être en situation de handicap (taux ≥ 50%).',
-                        'Solutions possibles :<br>• Crédit d\'impôt pour l\'accessibilité<br>• Aides de votre mutuelle<br>• Prêt à l\'amélioration de l\'habitat<br>• Aides locales spécifiques'
-                    );
-                    return false;
+                    return {
+                        eligible: false,
+                        reason: 'Vous devez avoir au moins 60 ans ou être en situation de handicap'
+                    };
                 }
 
-                return true;
-            }
-
-            showIneligibilityMessage(title, reason, alternatives) {
-                const simulator = this.container.querySelector('.maprimeadapt-simulator');
-                const ineligibleDiv = simulator.querySelector('.simulator-ineligible-message');
-                const reasonDiv = simulator.querySelector('.simulator-ineligible-reason');
-                const alternativeDiv = simulator.querySelector('.alternative-info');
-                
-                // Hide all questions
-                simulator.querySelectorAll('.simulator-question').forEach(q => {
-                    q.classList.remove('active');
-                    q.style.display = 'none';
-                });
-                
-                // Hide navigation buttons
-                simulator.querySelector('.simulator-next-btn').style.display = 'none';
-                simulator.querySelector('.simulator-prev-btn').style.display = 'none';
-                
-                // Update content (removed the emoji)
-                reasonDiv.innerHTML = `
-                    <p style="margin-bottom: 15px;"><strong>Raison :</strong> ${reason}</p>
-                `;
-                
-                alternativeDiv.innerHTML = `
-                    <strong>💡 Alternatives possibles :</strong><br>
-                    ${alternatives}
-                `;
-                
-                // Show message
-                ineligibleDiv.classList.add('show');
-                
-                // Add retry button
-                const retryButton = document.createElement('button');
-                retryButton.className = 'simulator-btn simulator-btn-secondary';
-                retryButton.style.marginTop = '20px';
-                retryButton.textContent = '← Recommencer';
-                retryButton.onclick = () => this.restartSimulator();
-                
-                if (!ineligibleDiv.querySelector('.simulator-btn')) {
-                    ineligibleDiv.appendChild(retryButton);
-                }
-            }
-
-            restartSimulator() {
-                // Reset state
-                this.currentQuestion = 1;
-                this.responses = {};
-                
-                const simulator = this.container.querySelector('.maprimeadapt-simulator');
-                
-                // Hide ineligible message
-                simulator.querySelector('.simulator-ineligible-message').classList.remove('show');
-                
-                // Reset all questions: remove any inline styles and active classes
-                simulator.querySelectorAll('.simulator-question').forEach(q => {
-                    q.style.display = '';  // Remove any inline display style
-                    q.classList.remove('active');  // Remove active class
-                });
-                
-                // Reset form
-                simulator.querySelectorAll('.simulator-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                
-                simulator.querySelectorAll('input').forEach(input => {
-                    input.value = '';
-                    if (input.type === 'checkbox') input.checked = false;
-                });
-                
-                // Remove any existing validation errors
-                const existingError = simulator.querySelector('.validation-error');
-                if (existingError) {
-                    existingError.remove();
-                }
-                
-                // Show only the first question
-                simulator.querySelector('[data-question="1"]').classList.add('active');
-                
-                // Restore navigation buttons
-                simulator.querySelector('.simulator-next-btn').style.display = 'block';
-                simulator.querySelector('.simulator-prev-btn').style.display = 'none';
-                
-                // Update progress and buttons
-                this.updateProgress();
-                this.updateButtons();
+                return { eligible: true };
             }
 
             calculateEligibility() {
+                // First check basic eligibility criteria
+                const eligibilityCheck = this.checkEligibility();
+                
+                if (!eligibilityCheck.eligible) {
+                    return eligibilityCheck;
+                }
+
+                // If basic criteria are met, check revenue eligibility
                 const codePostal = this.responses.codePostal;
                 const foyerSize = parseInt(this.responses.question_5);
                 const revenus = this.responses.question_6;
@@ -876,12 +739,14 @@
                 } else if (revenuEstime <= plafondModeste) {
                     return { eligible: true, taux: 50, montant: 11000, categorie: 'modeste' };
                 } else {
-                    return { eligible: false, taux: 0, montant: 0, categorie: 'non éligible' };
+                    return { eligible: false, reason: 'Vos revenus dépassent les plafonds MaPrimeAdapt' };
                 }
             }
 
             showResult() {
                 const simulator = this.container.querySelector('.maprimeadapt-simulator');
+                
+                // Check eligibility at the end
                 const eligibility = this.calculateEligibility();
                 
                 const resultDiv = simulator.querySelector('.simulator-result');
@@ -889,17 +754,22 @@
                 const detailsDiv = simulator.querySelector('.simulator-result-details');
                 
                 if (eligibility.eligible) {
+                    // Eligible case
+                    resultDiv.classList.remove('ineligible');
                     amountDiv.innerHTML = `Jusqu'à ${eligibility.montant.toLocaleString()}€`;
                     detailsDiv.innerHTML = `
-                        <p>✅ Vous êtes éligible à MaPrimeAdapt</p>
-                        <p>📊 Revenus ${eligibility.categorie} : ${eligibility.taux}% de prise en charge</p>
-                        <p>💰 Montant maximum : ${eligibility.montant.toLocaleString()}€</p>
+                        <p>Vous êtes éligible à MaPrimeAdapt</p>
+                        <p>Revenus ${eligibility.categorie} : ${eligibility.taux}% de prise en charge</p>
+                        <p>Montant maximum : ${eligibility.montant.toLocaleString()}€</p>
                     `;
                 } else {
+                    // Ineligible case
+                    resultDiv.classList.add('ineligible');
                     amountDiv.innerHTML = `Non éligible`;
                     detailsDiv.innerHTML = `
-                        <p>❌ Vos revenus dépassent les plafonds MaPrimeAdapt</p>
-                        <p>💡 D'autres aides peuvent exister (crédit d'impôt, aides locales)</p>
+                        <p>Vous n'êtes pas éligible à MaPrimeAdapt</p>
+                        <p><strong>Raison :</strong> ${eligibility.reason}</p>
+                        <p>D'autres aides peuvent exister (crédit d'impôt, aides locales, aides des caisses de retraite)</p>
                     `;
                 }
                 
@@ -907,16 +777,63 @@
                 simulator.querySelector('.simulator-next-btn').style.display = 'none';
                 simulator.querySelector('.simulator-prev-btn').style.display = 'none';
                 
-                this.sendData();
+                // Prepare data for webhook
+                const userData = {
+                    prenom: this.responses.prenom,
+                    nom: this.responses.nom,
+                    email: this.responses.email,
+                    telephone: this.responses.telephone,
+                    eligible: eligibility.eligible,
+                    responses: this.responses
+                };
+                
+                this.sendData(userData);
             }
 
-            sendData() {
-                // Callback pour l'intégration
-                if (typeof window.onMaPrimeAdaptComplete === 'function') {
-                    window.onMaPrimeAdaptComplete(this.responses);
-                }
+            sendData(userData) {
+                // Configuration du webhook (à modifier selon vos besoins)
+                const WEBHOOK_URL = 'https://votre-webhook-url.com/maprimeadapt'; // Remplacez par votre URL
                 
-                console.log('Données du simulateur:', this.responses);
+                // Données à envoyer
+                const dataToSend = {
+                    prenom: userData.prenom,
+                    nom: userData.nom,
+                    email: userData.email,
+                    telephone: userData.telephone,
+                    eligible: userData.eligible,
+                    responses: userData.responses,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('Données à envoyer au webhook:', dataToSend);
+                
+                // Envoi au webhook (décommenté quand vous aurez configuré votre URL)
+                /*
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToSend)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur réseau');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Webhook envoyé avec succès:', data);
+                })
+                .catch(error => {
+                    console.error('Erreur lors de l\'envoi du webhook:', error);
+                });
+                */
+                
+                // Callback pour l'intégration (optionnel)
+                if (typeof window.onMaPrimeAdaptComplete === 'function') {
+                    window.onMaPrimeAdaptComplete(dataToSend);
+                }
             }
 
             updateProgress() {
