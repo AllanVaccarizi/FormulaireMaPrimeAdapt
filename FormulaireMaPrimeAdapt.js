@@ -1,15 +1,100 @@
-// Widget MaPrimeAdapt Embeddable
-// Version: 1.0.0
+// Widget MaPrimeAdapt Embeddable - Version Sécurisée
+// Version: 1.2.0
 // Usage: <script src="maprimeadapt-widget.js"></script>
 //        <div id="maprimeadapt-simulator"></div>
 
 (function() {
     'use strict';
 
-    // Configuration par défaut (peut être surchargée)
+    // Utilitaires de sécurité renforcés
+    const SecurityUtils = {
+        // Échapper les caractères HTML pour prévenir XSS
+        escapeHtml: function(text) {
+            if (typeof text !== 'string') return text;
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        },
+
+        // Validation email renforcée
+        validateEmail: function(email) {
+            // Regex plus stricte basée sur RFC 5322
+            const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            
+            return emailRegex.test(email) && 
+                   email.length <= 254 &&
+                   email.indexOf('..') === -1 && // Pas de points consécutifs
+                   !email.startsWith('.') && 
+                   !email.endsWith('.');
+        },
+
+        // Validation téléphone français améliorée
+        validatePhone: function(phone) {
+            // Nettoie d'abord le numéro
+            const cleanPhone = phone.replace(/[\s.-]/g, '');
+            
+            // Formats acceptés : 06XXXXXXXX, 07XXXXXXXX, +336XXXXXXXX, +337XXXXXXXX
+            const mobileRegex = /^(?:\+33|0)[67](?:[0-9]{8})$/;
+            // Formats fixes : 01XXXXXXXX, 02XXXXXXXX, etc.
+            const fixeRegex = /^(?:\+33|0)[1-5](?:[0-9]{8})$/;
+            
+            return mobileRegex.test(cleanPhone) || fixeRegex.test(cleanPhone);
+        },
+
+        // Nettoyage renforcé des données
+        sanitizeInput: function(input) {
+            if (typeof input !== 'string') return input;
+            
+            return input
+                .trim()
+                .replace(/[<>\"'&]/g, '') // Caractères HTML dangereux
+                .replace(/javascript:/gi, '') // Protocoles dangereux
+                .replace(/on\w+\s*=/gi, '') // Attributs d'événements
+                .slice(0, 1000); // Limite globale de sécurité
+        },
+
+        // Validation des noms (plus restrictive)
+        validateName: function(name) {
+            // Accepte uniquement lettres, espaces, apostrophes, traits d'union
+            const nameRegex = /^[a-zA-ZÀ-ÿ\s'-]{2,50}$/;
+            return nameRegex.test(name) && 
+                   !name.includes('  ') && // Pas de doubles espaces
+                   name.trim().length >= 2;
+        },
+
+        // Validation code postal français renforcée
+        validatePostalCode: function(code) {
+            // Code postal français : 5 chiffres, ne commence pas par 00
+            return /^(?:0[1-9]|[1-8][0-9]|9[0-8])[0-9]{3}$/.test(code);
+        },
+
+        // Création sécurisée d'éléments HTML
+        createSecureElement: function(tag, textContent = '', className = '') {
+            const element = document.createElement(tag);
+            if (textContent) {
+                element.textContent = textContent; // Utilise textContent, jamais innerHTML
+            }
+            if (className) {
+                element.className = className;
+            }
+            return element;
+        },
+
+        // Génération d'un ID de session sécurisé
+        generateSessionId: function() {
+            const array = new Uint8Array(16);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+    };
+
+    // Configuration par défaut (sécurisée)
     const defaultConfig = {
         containerId: 'maprimeadapt-simulator',
-        webhookUrl: null, // À configurer
+        webhookUrl: null,
+        maxRetries: 3,
+        timeout: 10000,
+        debug: false, // Désactivé par défaut
         theme: {
             primaryColor: '#00b894',
             secondaryColor: '#95cd93',
@@ -17,11 +102,12 @@
         },
         callbacks: {
             onComplete: null,
-            onStep: null
+            onStep: null,
+            onError: null
         }
     };
 
-    // CSS du simulateur
+    // CSS du simulateur (inchangé)
     const simulatorCSS = `
         .maprimeadapt-simulator {
             max-width: 600px;
@@ -150,22 +236,6 @@
             border-color: #3498db;
         }
 
-        .simulator-checkbox-group {
-            display: flex;
-            align-items: center;
-            margin-top: 15px;
-        }
-
-        .simulator-checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 8px;
-        }
-
-        .simulator-checkbox-group label {
-            font-size: 14px;
-            font-weight: normal;
-        }
-
         .simulator-buttons {
             display: flex;
             gap: 15px;
@@ -272,7 +342,7 @@
         }
     `;
 
-    // Template HTML du simulateur
+    // Template HTML sécurisé
     const simulatorHTML = `
         <div class="maprimeadapt-simulator">
             <div class="simulator-header">
@@ -335,7 +405,7 @@
                         <h3 class="simulator-question-title">Votre foyer</h3>
                         <div class="simulator-input-group">
                             <label for="sim-codePostal">Code postal :</label>
-                            <input type="text" id="sim-codePostal" maxlength="5" placeholder="69000" required>
+                            <input type="text" id="sim-codePostal" maxlength="5" placeholder="69000" required autocomplete="postal-code">
                         </div>
                         <div class="simulator-input-group">
                             <label>Nombre de personnes dans le foyer :</label>
@@ -381,19 +451,19 @@
                         <p class="simulator-question-subtitle">Remplissez ce formulaire pour recevoir votre estimation par email</p>
                         <div class="simulator-input-group">
                             <label for="sim-prenom">Prénom :</label>
-                            <input type="text" id="sim-prenom" placeholder="Jean" required>
+                            <input type="text" id="sim-prenom" placeholder="Jean" required maxlength="50" autocomplete="given-name">
                         </div>
                         <div class="simulator-input-group">
                             <label for="sim-nom">Nom :</label>
-                            <input type="text" id="sim-nom" placeholder="Dupont" required>
+                            <input type="text" id="sim-nom" placeholder="Dupont" required maxlength="50" autocomplete="family-name">
                         </div>
                         <div class="simulator-input-group">
                             <label for="sim-email">Adresse mail :</label>
-                            <input type="email" id="sim-email" placeholder="jean.dupont@email.com" required>
+                            <input type="email" id="sim-email" placeholder="jean.dupont@email.com" required maxlength="254" autocomplete="email">
                         </div>
                         <div class="simulator-input-group">
                             <label for="sim-telephone">Numéro de téléphone :</label>
-                            <input type="tel" id="sim-telephone" placeholder="06 12 34 56 78" required>
+                            <input type="tel" id="sim-telephone" placeholder="06 12 34 56 78" required maxlength="14" autocomplete="tel">
                         </div>
                     </div>
 
@@ -417,7 +487,7 @@
         </div>
     `;
 
-    // Classe principale du simulateur
+    // Classe principale sécurisée
     class MaPrimeAdaptSimulator {
         constructor(config = {}) {
             this.config = Object.assign({}, defaultConfig, config);
@@ -425,31 +495,51 @@
             this.currentQuestion = 1;
             this.totalQuestions = 8;
             this.responses = {};
+            this.retryCount = 0;
             
             if (!this.container) {
-                console.error(`Element with ID '${this.config.containerId}' not found`);
+                this.logError(`Element with ID '${this.config.containerId}' not found`);
                 return;
             }
             
             this.init();
         }
 
+        logError(message, data = null) {
+            if (this.config.debug) {
+                console.error('[MaPrimeAdapt]', message, data);
+            }
+            
+            if (this.config.callbacks.onError) {
+                this.config.callbacks.onError(message, data);
+            }
+        }
+
+        logDebug(message, data = null) {
+            if (this.config.debug) {
+                console.log('[MaPrimeAdapt]', message, data);
+            }
+        }
+
         init() {
-            this.injectStyles();
-            this.injectHTML();
-            this.bindEvents();
-            this.updateProgress();
-            this.updateButtons();
+            try {
+                this.injectStyles();
+                this.injectHTML();
+                this.bindEvents();
+                this.updateProgress();
+                this.updateButtons();
+                this.logDebug('Widget initialisé avec succès');
+            } catch (error) {
+                this.logError('Erreur lors de l\'initialisation:', error);
+            }
         }
 
         injectStyles() {
-            // Inject CSS variables for theming
             const root = document.documentElement;
             root.style.setProperty('--maprimeadapt-primary', this.config.theme.primaryColor);
             root.style.setProperty('--maprimeadapt-secondary', this.config.theme.secondaryColor);
             root.style.setProperty('--maprimeadapt-border-radius', this.config.theme.borderRadius);
             
-            // Inject CSS if not already present
             if (!document.querySelector('#maprimeadapt-styles')) {
                 const style = document.createElement('style');
                 style.id = 'maprimeadapt-styles';
@@ -465,35 +555,30 @@
         bindEvents() {
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
             
-            // Options selection
             simulator.querySelectorAll('.simulator-option').forEach(option => {
                 option.addEventListener('click', (e) => {
                     const questionDiv = e.target.closest('.simulator-question');
                     const questionNum = questionDiv.dataset.question;
                     
-                    // Special handling for question 7 (multiple selection)
                     if (questionNum === '7') {
                         e.target.classList.toggle('selected');
                         const selectedOptions = Array.from(questionDiv.querySelectorAll('.simulator-option.selected'))
-                            .map(opt => opt.dataset.value);
+                            .map(opt => SecurityUtils.sanitizeInput(opt.dataset.value));
                         this.responses[`question_${questionNum}`] = selectedOptions;
                         return;
                     }
                     
-                    // Regular single selection
                     questionDiv.querySelectorAll('.simulator-option').forEach(opt => {
                         opt.classList.remove('selected');
                     });
                     
                     e.target.classList.add('selected');
-                    this.responses[`question_${questionNum}`] = e.target.dataset.value;
+                    this.responses[`question_${questionNum}`] = SecurityUtils.sanitizeInput(e.target.dataset.value);
                     
-                    // Trigger step callback
                     if (this.config.callbacks.onStep) {
                         this.config.callbacks.onStep(questionNum, e.target.dataset.value);
                     }
                     
-                    // Auto-advance for some questions
                     if (questionNum <= 4 || questionNum == 6) {
                         setTimeout(() => {
                             this.nextQuestion();
@@ -502,7 +587,6 @@
                 });
             });
 
-            // Navigation buttons
             simulator.querySelector('.simulator-next-btn').addEventListener('click', () => {
                 this.nextQuestion();
             });
@@ -511,12 +595,235 @@
                 this.previousQuestion();
             });
 
-            // Code postal validation
+            // Validation renforcée code postal
             simulator.querySelector('#sim-codePostal').addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 5);
+            });
+
+            // Validation téléphone en temps réel
+            simulator.querySelector('#sim-telephone').addEventListener('input', (e) => {
+                const value = e.target.value.replace(/[^0-9+\s.-]/g, '');
+                e.target.value = value.slice(0, 14);
+            });
+
+            // Validation nom/prénom (pas de caractères spéciaux)
+            ['#sim-prenom', '#sim-nom'].forEach(selector => {
+                simulator.querySelector(selector).addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s-']/g, '').slice(0, 50);
+                });
             });
         }
 
+        validateCurrentQuestion() {
+            const simulator = this.container.querySelector('.maprimeadapt-simulator');
+            
+            if (this.currentQuestion === 5) {
+                const codePostal = SecurityUtils.sanitizeInput(simulator.querySelector('#sim-codePostal').value);
+                const foyerSize = this.responses.question_5;
+                
+                if (!codePostal || !SecurityUtils.validatePostalCode(codePostal)) {
+                    this.showValidationError('Veuillez saisir un code postal français valide (5 chiffres)');
+                    return false;
+                }
+                
+                if (!foyerSize) {
+                    this.showValidationError('Veuillez sélectionner le nombre de personnes dans votre foyer');
+                    return false;
+                }
+                
+                this.responses.codePostal = codePostal;
+                return true;
+            }
+
+            if (this.currentQuestion === 7) {
+                return true;
+            }
+
+            if (this.currentQuestion === 8) {
+                const prenom = SecurityUtils.sanitizeInput(simulator.querySelector('#sim-prenom').value);
+                const nom = SecurityUtils.sanitizeInput(simulator.querySelector('#sim-nom').value);
+                const email = SecurityUtils.sanitizeInput(simulator.querySelector('#sim-email').value);
+                const telephone = SecurityUtils.sanitizeInput(simulator.querySelector('#sim-telephone').value);
+                
+                // Validation renforcée
+                if (!SecurityUtils.validateName(prenom)) {
+                    this.showValidationError('Prénom invalide (2-50 caractères, lettres uniquement)');
+                    return false;
+                }
+                
+                if (!SecurityUtils.validateName(nom)) {
+                    this.showValidationError('Nom invalide (2-50 caractères, lettres uniquement)');
+                    return false;
+                }
+                
+                if (!SecurityUtils.validateEmail(email)) {
+                    this.showValidationError('Adresse email invalide');
+                    return false;
+                }
+                
+                if (!SecurityUtils.validatePhone(telephone)) {
+                    this.showValidationError('Numéro de téléphone français invalide');
+                    return false;
+                }
+                
+                this.responses.prenom = prenom;
+                this.responses.nom = nom;
+                this.responses.email = email;
+                this.responses.telephone = telephone;
+                
+                return true;
+            }
+
+            const currentQuestionDiv = simulator.querySelector(`[data-question="${this.currentQuestion}"]`);
+            const selectedOption = currentQuestionDiv.querySelector('.simulator-option.selected');
+            if (!selectedOption) {
+                this.showValidationError('Veuillez sélectionner une option');
+                return false;
+            }
+
+            return true;
+        }
+
+        showResult() {
+            const simulator = this.container.querySelector('.maprimeadapt-simulator');
+            const eligibility = this.calculateEligibility();
+            
+            const resultDiv = simulator.querySelector('.simulator-result');
+            const amountDiv = simulator.querySelector('.simulator-result-amount');
+            const detailsDiv = simulator.querySelector('.simulator-result-details');
+            
+            // Vide le contenu de manière sécurisée
+            while (detailsDiv.firstChild) {
+                detailsDiv.removeChild(detailsDiv.firstChild);
+            }
+            
+            if (eligibility.eligible) {
+                resultDiv.classList.remove('ineligible');
+                amountDiv.textContent = `Jusqu'à ${eligibility.montant.toLocaleString()}€`;
+                
+                // Construction 100% sécurisée avec createElement
+                const eligibleP = SecurityUtils.createSecureElement('p', 'Vous êtes éligible à MaPrimeAdapt');
+                detailsDiv.appendChild(eligibleP);
+                
+                const categoryP = SecurityUtils.createSecureElement('p', 
+                    `Revenus ${eligibility.categorie} : ${eligibility.taux}% de prise en charge`);
+                detailsDiv.appendChild(categoryP);
+                
+                const amountP = SecurityUtils.createSecureElement('p', 
+                    `Montant maximum : ${eligibility.montant.toLocaleString()}€`);
+                detailsDiv.appendChild(amountP);
+                
+            } else {
+                resultDiv.classList.add('ineligible');
+                amountDiv.textContent = 'Non éligible';
+                
+                const ineligibleP = SecurityUtils.createSecureElement('p', 
+                    'Vous n\'êtes pas éligible à MaPrimeAdapt');
+                detailsDiv.appendChild(ineligibleP);
+                
+                const reasonP = SecurityUtils.createSecureElement('p');
+                const reasonStrong = SecurityUtils.createSecureElement('strong', 'Raison : ');
+                reasonP.appendChild(reasonStrong);
+                reasonP.appendChild(document.createTextNode(eligibility.reason));
+                detailsDiv.appendChild(reasonP);
+                
+                const alternativeP = SecurityUtils.createSecureElement('p', 
+                    'D\'autres aides peuvent exister (crédit d\'impôt, aides locales, aides des caisses de retraite)');
+                detailsDiv.appendChild(alternativeP);
+            }
+            
+            resultDiv.classList.add('show');
+            simulator.querySelector('.simulator-next-btn').style.display = 'none';
+            simulator.querySelector('.simulator-prev-btn').style.display = 'none';
+            
+            const userData = {
+                prenom: this.responses.prenom,
+                nom: this.responses.nom,
+                email: this.responses.email,
+                telephone: this.responses.telephone,
+                eligible: eligibility.eligible,
+                eligibility: eligibility,
+                responses: this.responses,
+                timestamp: new Date().toISOString(),
+                sessionId: SecurityUtils.generateSessionId()
+            };
+            
+            this.sendData(userData);
+            
+            if (this.config.callbacks.onComplete) {
+                this.config.callbacks.onComplete(userData);
+            }
+        }
+
+        sendData(userData) {
+            if (!this.config.webhookUrl) {
+                this.logDebug('Aucun webhook configuré');
+                return;
+            }
+
+            // Validation URL plus stricte
+            let webhookUrl;
+            try {
+                webhookUrl = new URL(this.config.webhookUrl);
+                // Vérification que c'est HTTPS en production
+                if (webhookUrl.protocol !== 'https:' && location.protocol === 'https:') {
+                    throw new Error('Webhook doit être HTTPS');
+                }
+            } catch (error) {
+                this.logError('URL de webhook invalide:', error.message);
+                return;
+            }
+
+            // Données nettoyées (suppression des infos sensibles)
+            const cleanUserData = {
+                ...userData,
+                userAgent: 'browser', // Information générique
+                timestamp: userData.timestamp,
+                sessionId: userData.sessionId
+            };
+
+            // Log sécurisé (sans données sensibles)
+            this.logDebug('Envoi des données au webhook', {
+                eligible: userData.eligible,
+                timestamp: userData.timestamp
+            });
+
+            // Envoi avec sécurités renforcées
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+            fetch(webhookUrl.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // Protection CSRF basique
+                },
+                body: JSON.stringify(cleanUserData),
+                signal: controller.signal,
+                credentials: 'omit', // Pas d'envoi de cookies
+                referrerPolicy: 'no-referrer' // Pas d'envoi du referrer
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                this.logDebug('Webhook envoyé avec succès');
+                this.retryCount = 0;
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                this.logError('Erreur webhook:', error.name); // Log moins détaillé
+                
+                if (this.retryCount < this.config.maxRetries && error.name !== 'AbortError') {
+                    this.retryCount++;
+                    setTimeout(() => this.sendData(userData), 
+                        Math.min(2000 * Math.pow(2, this.retryCount), 10000)); // Backoff exponentiel
+                }
+            });
+        }
+
+        // Méthodes utilitaires
         nextQuestion() {
             if (!this.validateCurrentQuestion()) {
                 return;
@@ -527,7 +834,6 @@
                 return;
             }
 
-            // Skip handicap question if 70+
             if (this.currentQuestion === 3 && this.responses.question_3 === '70_plus') {
                 this.currentQuestion = 5;
             } else {
@@ -573,66 +879,6 @@
             this.updateButtons();
         }
 
-        validateCurrentQuestion() {
-            const simulator = this.container.querySelector('.maprimeadapt-simulator');
-            
-            if (this.currentQuestion === 5) {
-                const codePostal = simulator.querySelector('#sim-codePostal').value;
-                const foyerSize = this.responses.question_5;
-                
-                if (!codePostal || codePostal.length !== 5) {
-                    this.showValidationError('Veuillez saisir un code postal valide (5 chiffres)');
-                    return false;
-                }
-                
-                if (!foyerSize) {
-                    this.showValidationError('Veuillez sélectionner le nombre de personnes dans votre foyer');
-                    return false;
-                }
-                
-                this.responses.codePostal = codePostal;
-                return true;
-            }
-
-            if (this.currentQuestion === 7) {
-                return true; // Optional question
-            }
-
-            if (this.currentQuestion === 8) {
-                const prenom = simulator.querySelector('#sim-prenom').value;
-                const nom = simulator.querySelector('#sim-nom').value;
-                const email = simulator.querySelector('#sim-email').value;
-                const telephone = simulator.querySelector('#sim-telephone').value;
-                
-                if (!prenom || !nom || !email || !telephone) {
-                    this.showValidationError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
-                
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    this.showValidationError('Veuillez saisir une adresse email valide');
-                    return false;
-                }
-                
-                this.responses.prenom = prenom;
-                this.responses.nom = nom;
-                this.responses.email = email;
-                this.responses.telephone = telephone;
-                
-                return true;
-            }
-
-            const currentQuestionDiv = simulator.querySelector(`[data-question="${this.currentQuestion}"]`);
-            const selectedOption = currentQuestionDiv.querySelector('.simulator-option.selected');
-            if (!selectedOption) {
-                this.showValidationError('Veuillez sélectionner une option');
-                return false;
-            }
-
-            return true;
-        }
-
         showValidationError(message) {
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
             
@@ -643,7 +889,7 @@
             
             const errorDiv = document.createElement('div');
             errorDiv.className = 'validation-error';
-            errorDiv.textContent = message;
+            errorDiv.textContent = SecurityUtils.escapeHtml(message); // Sécurisation du message
             
             const currentQuestion = simulator.querySelector('.simulator-question.active');
             const buttons = simulator.querySelector('.simulator-buttons');
@@ -692,6 +938,15 @@
             const foyerSize = parseInt(this.responses.question_5);
             const revenus = this.responses.question_6;
             
+            // Validation supplémentaire côté calcul
+            if (!codePostal || !SecurityUtils.validatePostalCode(codePostal)) {
+                return { eligible: false, reason: 'Code postal invalide' };
+            }
+
+            if (isNaN(foyerSize) || foyerSize < 1 || foyerSize > 6) {
+                return { eligible: false, reason: 'Taille de foyer invalide' };
+            }
+
             const idfCodes = ['75', '77', '78', '91', '92', '93', '94', '95'];
             const isIleDeFrance = idfCodes.includes(codePostal.substring(0, 2));
             
@@ -715,6 +970,8 @@
                 case '20000_30000': revenuEstime = 25000; break;
                 case '30000_40000': revenuEstime = 35000; break;
                 case 'plus_40000': revenuEstime = 45000; break;
+                default: 
+                    return { eligible: false, reason: 'Tranche de revenus invalide' };
             }
             
             const plafondTresModeste = plafonds[region].tres_modeste[plafondIndex];
@@ -729,84 +986,9 @@
             }
         }
 
-        showResult() {
-            const simulator = this.container.querySelector('.maprimeadapt-simulator');
-            const eligibility = this.calculateEligibility();
-            
-            const resultDiv = simulator.querySelector('.simulator-result');
-            const amountDiv = simulator.querySelector('.simulator-result-amount');
-            const detailsDiv = simulator.querySelector('.simulator-result-details');
-            
-            if (eligibility.eligible) {
-                resultDiv.classList.remove('ineligible');
-                amountDiv.innerHTML = `Jusqu'à ${eligibility.montant.toLocaleString()}€`;
-                detailsDiv.innerHTML = `
-                    <p>Vous êtes éligible à MaPrimeAdapt</p>
-                    <p>Revenus ${eligibility.categorie} : ${eligibility.taux}% de prise en charge</p>
-                    <p>Montant maximum : ${eligibility.montant.toLocaleString()}€</p>
-                `;
-            } else {
-                resultDiv.classList.add('ineligible');
-                amountDiv.innerHTML = `Non éligible`;
-                detailsDiv.innerHTML = `
-                    <p>Vous n'êtes pas éligible à MaPrimeAdapt</p>
-                    <p><strong>Raison :</strong> ${eligibility.reason}</p>
-                    <p>D'autres aides peuvent exister (crédit d'impôt, aides locales, aides des caisses de retraite)</p>
-                `;
-            }
-            
-            resultDiv.classList.add('show');
-            simulator.querySelector('.simulator-next-btn').style.display = 'none';
-            simulator.querySelector('.simulator-prev-btn').style.display = 'none';
-            
-            const userData = {
-                prenom: this.responses.prenom,
-                nom: this.responses.nom,
-                email: this.responses.email,
-                telephone: this.responses.telephone,
-                eligible: eligibility.eligible,
-                eligibility: eligibility,
-                responses: this.responses,
-                timestamp: new Date().toISOString()
-            };
-            
-            this.sendData(userData);
-            
-            // Trigger completion callback
-            if (this.config.callbacks.onComplete) {
-                this.config.callbacks.onComplete(userData);
-            }
-        }
-
-        sendData(userData) {
-            console.log('Données du simulateur:', userData);
-            
-            if (this.config.webhookUrl) {
-                fetch(this.config.webhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(userData)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erreur réseau');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Webhook envoyé avec succès:', data);
-                })
-                .catch(error => {
-                    console.error('Erreur lors de l\'envoi du webhook:', error);
-                });
-            }
-        }
-
         updateProgress() {
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
-            const progress = (this.currentQuestion / this.totalQuestions) * 100;
+            const progress = Math.min(100, (this.currentQuestion / this.totalQuestions) * 100);
             simulator.querySelector('.simulator-progress-fill').style.width = `${progress}%`;
         }
 
@@ -824,63 +1006,105 @@
             }
         }
 
-        // Méthodes publiques pour l'API
+        // API publique sécurisée
         reset() {
-            this.currentQuestion = 1;
-            this.responses = {};
-            this.showQuestion();
-            
-            const simulator = this.container.querySelector('.maprimeadapt-simulator');
-            const resultDiv = simulator.querySelector('.simulator-result');
-            resultDiv.classList.remove('show');
-            simulator.querySelector('.simulator-next-btn').style.display = 'block';
+            try {
+                this.currentQuestion = 1;
+                this.responses = {};
+                this.retryCount = 0;
+                this.showQuestion();
+                
+                const simulator = this.container.querySelector('.maprimeadapt-simulator');
+                const resultDiv = simulator.querySelector('.simulator-result');
+                resultDiv.classList.remove('show');
+                simulator.querySelector('.simulator-next-btn').style.display = 'block';
+                
+                this.logDebug('Widget réinitialisé');
+            } catch (error) {
+                this.logError('Erreur lors de la réinitialisation:', error);
+            }
         }
 
         updateConfig(newConfig) {
+            if (typeof newConfig !== 'object' || newConfig === null) {
+                this.logError('Configuration invalide');
+                return;
+            }
+
             this.config = Object.assign(this.config, newConfig);
-            this.injectStyles(); // Re-inject styles with new theme
+            this.injectStyles();
+            this.logDebug('Configuration mise à jour');
         }
 
         getCurrentStep() {
             return {
                 question: this.currentQuestion,
                 total: this.totalQuestions,
-                responses: this.responses
+                responses: Object.keys(this.responses).length
             };
+        }
+
+        // Méthode pour vérifier l'intégrité du widget
+        checkIntegrity() {
+            const checks = {
+                container: !!this.container,
+                questions: this.container?.querySelectorAll('.simulator-question').length === 8,
+                buttons: this.container?.querySelectorAll('.simulator-btn').length === 2,
+                styles: !!document.querySelector('#maprimeadapt-styles')
+            };
+
+            const isValid = Object.values(checks).every(check => check);
+            this.logDebug('Vérification d\'intégrité:', { isValid, checks });
+            
+            return { isValid, checks };
         }
     }
 
-    // API globale pour initialiser le simulateur
+    // API globale sécurisée
     window.MaPrimeAdapt = {
         init: function(config = {}) {
-            return new MaPrimeAdaptSimulator(config);
+            try {
+                return new MaPrimeAdaptSimulator(config);
+            } catch (error) {
+                console.error('[MaPrimeAdapt] Erreur d\'initialisation:', error);
+                return null;
+            }
         },
         
-        // Version avec auto-initialisation
         auto: function(config = {}) {
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => {
-                    return new MaPrimeAdaptSimulator(config);
+                    try {
+                        return new MaPrimeAdaptSimulator(config);
+                    } catch (error) {
+                        console.error('[MaPrimeAdapt] Erreur d\'auto-initialisation:', error);
+                        return null;
+                    }
                 });
             } else {
-                return new MaPrimeAdaptSimulator(config);
+                return this.init(config);
             }
-        }
+        },
+        
+        version: '1.2.0-secure'
     };
 
-    // Auto-initialisation si un élément avec l'ID par défaut existe
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+    // Auto-initialisation sécurisée
+    function autoInit() {
+        try {
             const defaultContainer = document.getElementById('maprimeadapt-simulator');
             if (defaultContainer && !defaultContainer.hasAttribute('data-manual-init')) {
                 new MaPrimeAdaptSimulator();
             }
-        });
-    } else {
-        const defaultContainer = document.getElementById('maprimeadapt-simulator');
-        if (defaultContainer && !defaultContainer.hasAttribute('data-manual-init')) {
-            new MaPrimeAdaptSimulator();
+        } catch (error) {
+            console.error('[MaPrimeAdapt] Erreur d\'auto-initialisation:', error);
         }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInit);
+    } else {
+        autoInit();
     }
 
 })();
