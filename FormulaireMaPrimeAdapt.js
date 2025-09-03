@@ -128,8 +128,8 @@
         }
 
         .simulator-header {
-            background: linear-gradient(#7eea58);
-            color: #2c3e50;
+            background: linear-gradient(135deg, var(--maprimeadapt-secondary, #95cd93) 0%, #7db87a 100%);
+            color: white;
             text-align: center;
             padding: 25px 20px;
         }
@@ -280,9 +280,9 @@
             background: #0d3b66;
             color: #ffffff;
             border: 2px dashed #7eea57;
+            border-width: 1px;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(13, 59, 102, 0.3);
-            border-width: 1px;
         }
 
         .simulator-btn-secondary {
@@ -503,11 +503,13 @@
 
                     <!-- Résultat -->
                     <div class="simulator-result">
-                        <h3>Votre estimation MaPrimeAdapt</h3>
+                        <h3>Vous êtes éligible</h3>
                         <div class="simulator-result-amount">Calcul en cours...</div>
                         <div class="simulator-result-details"></div>
-                        <p style="margin-top: 15px; font-size: 14px;">
-                            Estimation détaillée envoyée par email<br>
+                        <p style="margin-top: 15px; font-size: 16px; font-weight: 600;">
+                            Estimation détaillée envoyée par email
+                        </p>
+                        <p style="margin-top: 10px; font-size: 14px;">
                             Nos conseillers vous contacteront bientôt pour vous accompagner dans votre projet
                         </p>
                     </div>
