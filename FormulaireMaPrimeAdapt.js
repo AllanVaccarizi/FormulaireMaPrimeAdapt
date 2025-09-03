@@ -128,8 +128,8 @@
         }
 
         .simulator-header {
-            background: linear-gradient(135deg, var(--maprimeadapt-secondary, #95cd93) 0%, #7db87a 100%);
-            color: white;
+            background: linear-gradient(135deg, #7eea58);
+            color: #2c3e50;
             text-align: center;
             padding: 25px 20px;
         }
