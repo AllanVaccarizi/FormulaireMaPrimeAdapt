@@ -508,7 +508,7 @@
                         <div class="simulator-result-details"></div>
                         <p style="margin-top: 15px; font-size: 14px;">
                             Estimation détaillée envoyée par email<br>
-                            Nos conseillers vous contacteront sous 24h
+                            Nos conseillers vous contacteront bientôt pour vous accompagner dans votre projet
                         </p>
                     </div>
 
