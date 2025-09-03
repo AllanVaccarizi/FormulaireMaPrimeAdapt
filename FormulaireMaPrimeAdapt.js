@@ -128,8 +128,8 @@
         }
 
         .simulator-header {
-            background: linear-gradient(135deg, var(--maprimeadapt-secondary, #95cd93) 0%, #7db87a 100%);
-            color: white;
+            background: linear-gradient(#7eea58);
+            color: #2c3e50;
             text-align: center;
             padding: 25px 20px;
         }
@@ -266,7 +266,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.45s ease;
             font-family: 'Inter', sans-serif;
         }
 
@@ -279,7 +279,7 @@
         .simulator-btn-primary:hover {
             background: #0d3b66;
             color: #ffffff;
-            border: 2px dashed #ffffff;
+            border: 2px dashed #7eea57;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(13, 59, 102, 0.3);
         }
