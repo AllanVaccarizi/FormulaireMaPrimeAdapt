@@ -128,8 +128,8 @@
         }
 
         .simulator-header {
-            background: linear-gradient(135deg, #7eea58);
-            color: #2c3e50;
+            background: linear-gradient(135deg, var(--maprimeadapt-secondary, #95cd93) 0%, #7db87a 100%);
+            color: white;
             text-align: center;
             padding: 25px 20px;
         }
@@ -271,13 +271,17 @@
         }
 
         .simulator-btn-primary {
-            background: linear-gradient(135deg, var(--maprimeadapt-primary, #00b894), #55efc4);
-            color: white;
+            background: #73d859;
+            color: #3f4d3b;
+            border: 2px dashed #3f4d3b;
         }
 
         .simulator-btn-primary:hover {
+            background: #0d3b66;
+            color: #ffffff;
+            border: 2px dashed #ffffff;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+            box-shadow: 0 5px 15px rgba(13, 59, 102, 0.3);
         }
 
         .simulator-btn-secondary {
