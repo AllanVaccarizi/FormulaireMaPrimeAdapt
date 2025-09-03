@@ -164,7 +164,6 @@
 
         .simulator-content {
             padding: 30px;
-            background: var(--maprimeadapt-background-light, #EFF8F2);
         }
 
         .simulator-question {
