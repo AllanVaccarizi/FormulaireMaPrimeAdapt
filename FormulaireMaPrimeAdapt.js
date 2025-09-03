@@ -736,19 +736,9 @@
             
             if (eligibility.eligible) {
                 resultDiv.classList.remove('ineligible');
-                amountDiv.textContent = `Jusqu'à ${eligibility.montant.toLocaleString()}€`;
+                amountDiv.style.display = 'none'; // Cache le montant
                 
-                // Construction 100% sécurisée avec createElement
-                const eligibleP = SecurityUtils.createSecureElement('p', 'Vous êtes éligible à MaPrimeAdapt');
-                detailsDiv.appendChild(eligibleP);
-                
-                const categoryP = SecurityUtils.createSecureElement('p', 
-                    `Revenus ${eligibility.categorie} : ${eligibility.taux}% de prise en charge`);
-                detailsDiv.appendChild(categoryP);
-                
-                const amountP = SecurityUtils.createSecureElement('p', 
-                    `Montant maximum : ${eligibility.montant.toLocaleString()}€`);
-                detailsDiv.appendChild(amountP);
+                // Aucun contenu additionnel dans les détails - juste le message fixe
                 
             } else {
                 resultDiv.classList.add('ineligible');
