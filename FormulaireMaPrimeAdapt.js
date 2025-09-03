@@ -262,7 +262,7 @@
         .simulator-btn {
             padding: 10px 25px;
             border: none;
-            border-radius: 6px;
+            border-radius: 6.25rem;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -273,7 +273,7 @@
         .simulator-btn-primary {
             background: #73d859;
             color: #3f4d3b;
-            border: 2px dashed #3f4d3b;
+            border: 2px solid transparent;
         }
 
         .simulator-btn-primary:hover {
