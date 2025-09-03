@@ -282,6 +282,7 @@
             border: 2px dashed #7eea57;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(13, 59, 102, 0.3);
+            border-width: 1px;
         }
 
         .simulator-btn-secondary {
