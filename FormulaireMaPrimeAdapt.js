@@ -98,6 +98,7 @@
         theme: {
             primaryColor: '#00b894',
             secondaryColor: '#95cd93',
+            backgroundLight: '#EFF8F2',
             borderRadius: '15px'
         },
         callbacks: {
@@ -107,8 +108,10 @@
         }
     };
 
-    // CSS du simulateur (inchangé)
+    // CSS du simulateur avec nouvelles couleurs et typographies
     const simulatorCSS = `
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
         .maprimeadapt-simulator {
             max-width: 600px;
             margin: 0 auto;
@@ -116,7 +119,8 @@
             border-radius: var(--maprimeadapt-border-radius, 15px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
         }
 
         .maprimeadapt-simulator * {
@@ -133,18 +137,21 @@
         .simulator-header h2 {
             margin: 0 0 10px 0;
             font-size: 22px;
-            font-weight: bold;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .simulator-header p {
             margin: 0;
-            opacity: 0.9;
+            opacity: 0.7;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
         }
 
         .simulator-progress-bar {
             height: 4px;
-            background: #e0e0e0;
+            background: var(--maprimeadapt-background-light, #EFF8F2);
             position: relative;
         }
 
@@ -157,6 +164,7 @@
 
         .simulator-content {
             padding: 30px;
+            background: var(--maprimeadapt-background-light, #EFF8F2);
         }
 
         .simulator-question {
@@ -170,7 +178,8 @@
 
         .simulator-question-title {
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
             color: #2c3e50;
             margin-bottom: 10px;
         }
@@ -179,6 +188,8 @@
             color: #7f8c8d;
             margin-bottom: 20px;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
         }
 
         .simulator-options {
@@ -195,6 +206,8 @@
             transition: all 0.3s ease;
             background: white;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
         }
 
         .simulator-option:hover {
@@ -207,7 +220,7 @@
             border-color: var(--maprimeadapt-primary, #00b894);
             background: #f8fffc;
             color: var(--maprimeadapt-primary, #00b894);
-            font-weight: bold;
+            font-weight: 500;
         }
 
         .simulator-input-group {
@@ -217,9 +230,10 @@
         .simulator-input-group label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 500;
             color: #2c3e50;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
         }
 
         .simulator-input-group input {
@@ -229,6 +243,9 @@
             border-radius: 6px;
             font-size: 14px;
             transition: border-color 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            background: white;
         }
 
         .simulator-input-group input:focus {
@@ -248,9 +265,10 @@
             border: none;
             border-radius: 6px;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
         .simulator-btn-primary {
@@ -299,17 +317,27 @@
         .simulator-result h3 {
             font-size: 20px;
             margin-bottom: 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
         }
 
         .simulator-result-amount {
             font-size: 28px;
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 10px;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .simulator-result-details {
             font-size: 14px;
             line-height: 1.4;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+        }
+
+        .simulator-result-details p {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
         }
 
         .validation-error {
@@ -320,6 +348,8 @@
             margin-bottom: 15px;
             font-size: 14px;
             animation: simulatorFadeIn 0.3s ease-in;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
         }
 
         @keyframes simulatorFadeIn {
@@ -538,6 +568,7 @@
             const root = document.documentElement;
             root.style.setProperty('--maprimeadapt-primary', this.config.theme.primaryColor);
             root.style.setProperty('--maprimeadapt-secondary', this.config.theme.secondaryColor);
+            root.style.setProperty('--maprimeadapt-background-light', this.config.theme.backgroundLight);
             root.style.setProperty('--maprimeadapt-border-radius', this.config.theme.borderRadius);
             
             if (!document.querySelector('#maprimeadapt-styles')) {
