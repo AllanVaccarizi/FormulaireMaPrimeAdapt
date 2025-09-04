@@ -1,5 +1,5 @@
-// Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR - Thème Bleu
-// Version: 1.3.0-blue
+// Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR
+// Version: 1.3.0
 // Usage: <script src="maprimeadapt-widget.js"></script>
 //        <div id="maprimeadapt-simulator"></div>
 
@@ -88,17 +88,17 @@
         }
     };
 
-    // Configuration par défaut (sécurisée) - Thème bleu
+    // Configuration par défaut (sécurisée)
     const defaultConfig = {
         containerId: 'maprimeadapt-simulator',
-        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/911c1df3-3058-4f4d-9105-61a79967173e',
+        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/form',
         maxRetries: 3,
         timeout: 10000,
         debug: false, // Désactivé par défaut
         theme: {
-            primaryColor: '#3563a4',
-            secondaryColor: '#5a7bc4',
-            backgroundLight: '#f0f4ff',
+            primaryColor: '#00b894',
+            secondaryColor: '#95cd93',
+            backgroundLight: '#EFF8F2',
             borderRadius: '15px'
         },
         callbacks: {
@@ -108,7 +108,7 @@
         }
     };
 
-    // CSS du simulateur avec couleurs bleues
+    // CSS du simulateur avec nouvelles couleurs et typographies
     const simulatorCSS = `
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -128,8 +128,8 @@
         }
 
         .simulator-header {
-            background: linear-gradient(135deg, #3563a4, #5a7bc4);
-            color: white;
+            background: linear-gradient(#7eea58);
+            color: #2c3e50;
             text-align: center;
             padding: 25px 20px;
         }
@@ -139,27 +139,25 @@
             font-size: 22px;
             font-weight: 700;
             font-family: 'Montserrat', sans-serif;
-            color: white;
         }
 
         .simulator-header p {
             margin: 0;
-            opacity: 0.9;
+            opacity: 0.7;
             font-size: 14px;
             font-family: 'Inter', sans-serif;
             font-weight: 400;
-            color: white;
         }
 
         .simulator-progress-bar {
             height: 4px;
-            background: var(--maprimeadapt-background-light, #f0f4ff);
+            background: var(--maprimeadapt-background-light, #EFF8F2);
             position: relative;
         }
 
         .simulator-progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--maprimeadapt-primary, #3563a4), #5a7bc4);
+            background: linear-gradient(90deg, var(--maprimeadapt-primary, #00b894), #55efc4);
             transition: width 0.5s ease;
             width: 0%;
         }
@@ -212,15 +210,15 @@
         }
 
         .simulator-option:hover {
-            border-color: var(--maprimeadapt-primary, #3563a4);
+            border-color: #3498db;
             transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(53, 99, 164, 0.2);
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.2);
         }
 
         .simulator-option.selected {
-            border-color: var(--maprimeadapt-primary, #3563a4);
-            background: var(--maprimeadapt-background-light, #f0f4ff);
-            color: var(--maprimeadapt-primary, #3563a4);
+            border-color: var(--maprimeadapt-primary, #00b894);
+            background: #f8fffc;
+            color: var(--maprimeadapt-primary, #00b894);
             font-weight: 500;
         }
 
@@ -251,7 +249,7 @@
 
         .simulator-input-group input:focus {
             outline: none;
-            border-color: var(--maprimeadapt-primary, #3563a4);
+            border-color: #3498db;
         }
 
         .simulator-buttons {
@@ -273,18 +271,18 @@
         }
 
         .simulator-btn-primary {
-            background: var(--maprimeadapt-primary, #3563a4);
-            color: white;
+            background: #73d859;
+            color: #3f4d3b;
             border: 2px solid transparent;
         }
 
         .simulator-btn-primary:hover {
-            background: #2a4d87;
+            background: #0d3b66;
             color: #ffffff;
-            border: 2px solid var(--maprimeadapt-primary, #3563a4);
+            border: 2px dashed #7eea57;
             border-width: 1px;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(53, 99, 164, 0.3);
+            box-shadow: 0 5px 15px rgba(13, 59, 102, 0.3);
         }
 
         .simulator-btn-secondary {
@@ -305,7 +303,7 @@
             display: none;
             text-align: center;
             padding: 25px;
-            background: linear-gradient(135deg, var(--maprimeadapt-primary, #3563a4), #5a7bc4);
+            background: linear-gradient(135deg, var(--maprimeadapt-primary, #00b894), #55efc4);
             color: white;
             border-radius: 10px;
             margin-top: 20px;
@@ -325,7 +323,6 @@
             margin-bottom: 15px;
             font-family: 'Montserrat', sans-serif;
             font-weight: 600;
-            color: white;
         }
 
         .simulator-result-amount {
@@ -333,7 +330,6 @@
             font-weight: 700;
             margin-bottom: 10px;
             font-family: 'Montserrat', sans-serif;
-            color: white;
         }
 
         .simulator-result-details {
@@ -341,13 +337,11 @@
             line-height: 1.4;
             font-family: 'Inter', sans-serif;
             font-weight: 400;
-            color: white;
         }
 
         .simulator-result-details p {
             font-family: 'Inter', sans-serif;
             font-weight: 400;
-            color: white;
         }
 
         .validation-error {
@@ -397,7 +391,7 @@
         }
     `;
 
-    // Template HTML sécurisé avec question GIR et texte modifié
+    // Template HTML sécurisé avec question GIR
     const simulatorHTML = `
         <div class="maprimeadapt-simulator">
             <div class="simulator-header">
@@ -524,7 +518,7 @@
                     <!-- Question 8 -->
                     <div class="simulator-question" data-question="8">
                         <h3 class="simulator-question-title">Recevez votre estimation</h3>
-                        <p class="simulator-question-subtitle">Remplissez ce formulaire pour recevoir votre estimation par email et nos coordonnées</p>
+                        <p class="simulator-question-subtitle">Remplissez ce formulaire pour recevoir votre estimation par email</p>
                         <div class="simulator-input-group">
                             <label for="sim-prenom">Prénom :</label>
                             <input type="text" id="sim-prenom" placeholder="Jean" required maxlength="50" autocomplete="given-name">
@@ -1221,7 +1215,7 @@
             }
         },
         
-        version: '1.3.0-secure-gir-blue'
+        version: '1.3.0-secure-gir'
     };
 
     // Auto-initialisation sécurisée
