@@ -281,8 +281,7 @@
         .simulator-btn-primary:hover {
             background: #2a4d87;
             color: #ffffff;
-            border: 2px solid var(--maprimeadapt-primary, #3563a4);
-            border-width: 1px;
+            border: 2px dashed var(--maprimeadapt-primary, #3563a4);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(53, 99, 164, 0.3);
         }
