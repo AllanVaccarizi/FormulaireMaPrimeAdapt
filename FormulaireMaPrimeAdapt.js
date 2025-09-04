@@ -14,7 +14,48 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
-        },
+        }
+
+        // Méthode pour déclencher les événements Google Tag Manager
+        triggerGTMEvent(userData) {
+            // Vérification que GTM est disponible
+            if (typeof window.dataLayer === 'undefined') {
+                this.logDebug('dataLayer GTM non disponible');
+                return;
+            }
+
+            try {
+                // Événement principal de soumission
+                window.dataLayer.push({
+                    'event': 'maprimeadapt_form_submit',
+                    'form_type': 'maprimeadapt_simulator',
+                    'eligible': userData.eligible,
+                    'user_age_group': this.responses.question_3,
+                    'user_status': this.responses.question_2,
+                    'conversion_value': userData.eligible ? (userData.eligibility.montant || 0) : 0,
+                    'timestamp': userData.timestamp
+                });
+
+                // Événement spécifique selon éligibilité
+                if (userData.eligible) {
+                    window.dataLayer.push({
+                        'event': 'maprimeadapt_eligible',
+                        'conversion_category': userData.eligibility.categorie,
+                        'estimated_amount': userData.eligibility.montant,
+                        'aid_percentage': userData.eligibility.taux
+                    });
+                } else {
+                    window.dataLayer.push({
+                        'event': 'maprimeadapt_not_eligible',
+                        'ineligibility_reason': userData.eligibility.reason
+                    });
+                }
+
+                this.logDebug('Événements GTM déclenchés avec succès');
+                
+            } catch (error) {
+                this.logError('Erreur lors du déclenchement GTM:', error);
+            },
 
         // Validation email renforcée
         validateEmail: function(email) {
@@ -91,7 +132,7 @@
     // Configuration par défaut (sécurisée) - Thème bleu
     const defaultConfig = {
         containerId: 'maprimeadapt-simulator',
-        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/form',
+        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/911c1df3-3058-4f4d-9105-61a79967173e',
         maxRetries: 3,
         timeout: 10000,
         debug: false, // Désactivé par défaut
