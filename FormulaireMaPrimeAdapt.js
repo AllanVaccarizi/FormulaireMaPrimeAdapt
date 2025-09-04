@@ -14,31 +14,7 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
-        }
-
-        // Méthode pour déclencher les événements Google Tag Manager
-        triggerGTMEvent(userData) {
-            // Vérification que GTM est disponible
-            if (typeof window.dataLayer === 'undefined') {
-                this.logDebug('dataLayer GTM non disponible');
-                return;
-            }
-
-            try {
-                // Événement simple : 1 formulaire soumis = 1 conversion
-                window.dataLayer.push({
-                    'event': 'maprimeadapt_conversion',
-                    'form_name': 'maprimeadapt_simulator',
-                    'event_category': 'form',
-                    'event_action': 'submit',
-                    'event_label': 'maprimeadapt_form_completed'
-                });
-
-                this.logDebug('Conversion GTM déclenchée');
-                
-            } catch (error) {
-                this.logError('Erreur lors du déclenchement GTM:', error);
-            },
+        },
 
         // Validation email renforcée
         validateEmail: function(email) {
@@ -115,7 +91,7 @@
     // Configuration par défaut (sécurisée) - Thème bleu
     const defaultConfig = {
         containerId: 'maprimeadapt-simulator',
-        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/911c1df3-3058-4f4d-9105-61a79967173e',
+        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/form',
         maxRetries: 3,
         timeout: 10000,
         debug: false, // Désactivé par défaut
