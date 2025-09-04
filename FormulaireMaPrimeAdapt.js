@@ -1,5 +1,5 @@
-// Widget MaPrimeAdapt Embeddable - Version Sécurisée
-// Version: 1.2.0
+// Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR
+// Version: 1.3.0
 // Usage: <script src="maprimeadapt-widget.js"></script>
 //        <div id="maprimeadapt-simulator"></div>
 
@@ -133,8 +133,6 @@
             text-align: center;
             padding: 25px 20px;
         }
-
-
 
         .simulator-header h2 {
             margin: 0 0 10px 0;
@@ -358,6 +356,21 @@
             font-weight: 500;
         }
 
+        .gir-info-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .gir-info-box strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
         @keyframes simulatorFadeIn {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
@@ -378,7 +391,7 @@
         }
     `;
 
-    // Template HTML sécurisé
+    // Template HTML sécurisé avec question GIR
     const simulatorHTML = `
         <div class="maprimeadapt-simulator">
             <div class="simulator-header">
@@ -433,6 +446,27 @@
                             <div class="simulator-option" data-value="oui">Oui (taux ≥ 50% ou PCH)</div>
                             <div class="simulator-option" data-value="non">Non</div>
                             <div class="simulator-option" data-value="ne_sais_pas">Je ne sais pas</div>
+                        </div>
+                    </div>
+
+                    <!-- Question 4B - GIR (conditionnelle) -->
+                    <div class="simulator-question" data-question="4b">
+                        <h3 class="simulator-question-title">Niveau d'autonomie (GIR)</h3>
+                        <p class="simulator-question-subtitle">Avez-vous été évalué par un professionnel concernant votre niveau d'autonomie ?</p>
+                        
+                        <div class="gir-info-box">
+                            <strong>Le GIR (Groupe Iso-Ressources)</strong> évalue le degré de perte d'autonomie d'une personne :<br>
+                            • GIR 1-2 : Forte dépendance<br>
+                            • GIR 3-4 : Dépendance modérée<br>
+                            • GIR 5-6 : Faible dépendance<br><br>
+                            Cette évaluation peut avoir été réalisée par votre médecin traitant, un service médico-social, ou lors d'une demande d'APA.
+                        </div>
+                        
+                        <div class="simulator-options">
+                            <div class="simulator-option" data-value="gir_1_2">Oui, GIR 1 ou 2 (forte dépendance)</div>
+                            <div class="simulator-option" data-value="gir_3_4">Oui, GIR 3 ou 4 (dépendance modérée)</div>
+                            <div class="simulator-option" data-value="gir_5_6">Oui, GIR 5 ou 6 (faible dépendance)</div>
+                            <div class="simulator-option" data-value="pas_evalue">Non, je n'ai pas été évalué</div>
                         </div>
                     </div>
 
@@ -525,13 +559,13 @@
         </div>
     `;
 
-    // Classe principale sécurisée
+    // Classe principale sécurisée avec logique GIR
     class MaPrimeAdaptSimulator {
         constructor(config = {}) {
             this.config = Object.assign({}, defaultConfig, config);
             this.container = document.getElementById(this.config.containerId);
             this.currentQuestion = 1;
-            this.totalQuestions = 8;
+            this.totalQuestions = 8; // Le nombre reste 8, question 4b est conditionnelle
             this.responses = {};
             this.retryCount = 0;
             
@@ -618,7 +652,8 @@
                         this.config.callbacks.onStep(questionNum, e.target.dataset.value);
                     }
                     
-                    if (questionNum <= 4 || questionNum == 6) {
+                    // Navigation automatique pour certaines questions (sauf question 4b qui nécessite réflexion)
+                    if ((questionNum <= 4 && questionNum !== '4b') || questionNum == 6) {
                         setTimeout(() => {
                             this.nextQuestion();
                         }, 500);
@@ -651,6 +686,15 @@
                     e.target.value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s-']/g, '').slice(0, 50);
                 });
             });
+        }
+
+        // Méthode pour déterminer si la question GIR doit être affichée
+        shouldShowGirQuestion() {
+            const age = this.responses.question_3;
+            const handicap = this.responses.question_4;
+            
+            // Question GIR uniquement pour les 60-69 ans qui ne sont pas en situation de handicap
+            return age === '60_69' && (handicap === 'non' || handicap === 'ne_sais_pas');
         }
 
         validateCurrentQuestion() {
@@ -714,6 +758,11 @@
             }
 
             const currentQuestionDiv = simulator.querySelector(`[data-question="${this.currentQuestion}"]`);
+            if (!currentQuestionDiv) {
+                this.logError('Question introuvable:', this.currentQuestion);
+                return false;
+            }
+            
             const selectedOption = currentQuestionDiv.querySelector('.simulator-option.selected');
             if (!selectedOption) {
                 this.showValidationError('Veuillez sélectionner une option');
@@ -852,7 +901,7 @@
             });
         }
 
-        // Méthodes utilitaires
+        // Méthodes utilitaires avec logique GIR
         nextQuestion() {
             if (!this.validateCurrentQuestion()) {
                 return;
@@ -863,7 +912,18 @@
                 return;
             }
 
+            // Logique de navigation spéciale
             if (this.currentQuestion === 3 && this.responses.question_3 === '70_plus') {
+                // 70+ ans : skip question 4 et 4b, aller directement à 5
+                this.currentQuestion = 5;
+            } else if (this.currentQuestion === 4) {
+                // Après question 4, vérifier si on doit afficher 4b
+                if (this.shouldShowGirQuestion()) {
+                    this.currentQuestion = '4b';
+                } else {
+                    this.currentQuestion = 5;
+                }
+            } else if (this.currentQuestion === '4b') {
                 this.currentQuestion = 5;
             } else {
                 this.currentQuestion++;
@@ -874,8 +934,18 @@
 
         previousQuestion() {
             if (this.currentQuestion > 1) {
-                if (this.currentQuestion === 5 && this.responses.question_3 === '70_plus') {
-                    this.currentQuestion = 3;
+                // Logique de retour en arrière
+                if (this.currentQuestion === 5) {
+                    // Depuis question 5, retourner vers 4b ou 4 selon le cas
+                    if (this.shouldShowGirQuestion() && this.responses.question_4b) {
+                        this.currentQuestion = '4b';
+                    } else if (this.responses.question_3 === '70_plus') {
+                        this.currentQuestion = 3;
+                    } else {
+                        this.currentQuestion = 4;
+                    }
+                } else if (this.currentQuestion === '4b') {
+                    this.currentQuestion = 4;
                 } else {
                     this.currentQuestion--;
                 }
@@ -946,12 +1016,34 @@
                 };
             }
 
-            if (this.responses.question_3 === 'moins_60' && this.responses.question_4 === 'non') {
-                return {
-                    eligible: false,
-                    reason: 'Vous devez avoir au moins 60 ans ou être en situation de handicap'
-                };
+            const age = this.responses.question_3;
+            const handicap = this.responses.question_4;
+            const gir = this.responses.question_4b;
+
+            // Nouvelle logique d'éligibilité avec GIR
+            if (age === 'moins_60') {
+                // Moins de 60 ans : obligatoirement handicap ≥50% ou PCH
+                if (handicap !== 'oui') {
+                    return {
+                        eligible: false,
+                        reason: 'Vous devez avoir au moins 60 ans ou être en situation de handicap (taux ≥ 50% ou PCH)'
+                    };
+                }
+            } else if (age === '60_69') {
+                // 60-69 ans : soit handicap ≥50%/PCH, soit GIR 1-6
+                if (handicap === 'oui') {
+                    // Handicap confirmé : éligible
+                } else if (handicap === 'non' || handicap === 'ne_sais_pas') {
+                    // Pas de handicap confirmé : vérifier GIR
+                    if (!gir || gir === 'pas_evalue') {
+                        return {
+                            eligible: false,
+                            reason: 'Entre 60 et 69 ans, vous devez soit être en situation de handicap (taux ≥ 50% ou PCH), soit justifier d\'un niveau de perte d\'autonomie évalué (GIR 1 à 6)'
+                        };
+                    }
+                }
             }
+            // 70+ ans : éligible sans condition supplémentaire
 
             return { eligible: true };
         }
@@ -1017,7 +1109,15 @@
 
         updateProgress() {
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
-            const progress = Math.min(100, (this.currentQuestion / this.totalQuestions) * 100);
+            // Calcul du progrès en tenant compte des questions conditionnelles
+            let questionCount = this.currentQuestion;
+            if (this.currentQuestion === '4b') {
+                questionCount = 4.5; // Entre 4 et 5
+            } else if (this.currentQuestion > 4) {
+                questionCount = this.currentQuestion;
+            }
+            
+            const progress = Math.min(100, (questionCount / this.totalQuestions) * 100);
             simulator.querySelector('.simulator-progress-fill').style.width = `${progress}%`;
         }
 
@@ -1077,7 +1177,7 @@
         checkIntegrity() {
             const checks = {
                 container: !!this.container,
-                questions: this.container?.querySelectorAll('.simulator-question').length === 8,
+                questions: this.container?.querySelectorAll('.simulator-question').length === 9, // 8 + question 4b
                 buttons: this.container?.querySelectorAll('.simulator-btn').length === 2,
                 styles: !!document.querySelector('#maprimeadapt-styles')
             };
@@ -1115,7 +1215,7 @@
             }
         },
         
-        version: '1.2.0-secure'
+        version: '1.3.0-secure-gir'
     };
 
     // Auto-initialisation sécurisée
