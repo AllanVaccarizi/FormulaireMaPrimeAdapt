@@ -834,8 +834,36 @@
             
             this.sendData(userData);
             
+            // Déclenchement Google Tag Manager
+            this.triggerGTMEvent(userData);
+            
             if (this.config.callbacks.onComplete) {
                 this.config.callbacks.onComplete(userData);
+            }
+        }
+
+        // Méthode pour déclencher les événements Google Tag Manager
+        triggerGTMEvent(userData) {
+            // Vérification que GTM est disponible
+            if (typeof window.dataLayer === 'undefined') {
+                this.logDebug('dataLayer GTM non disponible');
+                return;
+            }
+
+            try {
+                // Événement simple : 1 formulaire soumis = 1 conversion
+                window.dataLayer.push({
+                    'event': 'maprimeadapt_conversion',
+                    'form_name': 'maprimeadapt_simulator',
+                    'event_category': 'form',
+                    'event_action': 'submit',
+                    'event_label': 'maprimeadapt_form_completed'
+                });
+
+                this.logDebug('Conversion GTM déclenchée');
+                
+            } catch (error) {
+                this.logError('Erreur lors du déclenchement GTM:', error);
             }
         }
 
@@ -1221,7 +1249,7 @@
             }
         },
         
-        version: '1.3.0-secure-gir-blue'
+        version: '1.3.0-secure-gir-blue-gtm'
     };
 
     // Auto-initialisation sécurisée
