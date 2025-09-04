@@ -782,6 +782,14 @@
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
             const eligibility = this.calculateEligibility();
             
+            // Cache la question active et les boutons
+            const activeQuestion = simulator.querySelector('.simulator-question.active');
+            if (activeQuestion) {
+                activeQuestion.classList.remove('active');
+            }
+            simulator.querySelector('.simulator-next-btn').style.display = 'none';
+            simulator.querySelector('.simulator-prev-btn').style.display = 'none';
+            
             const resultDiv = simulator.querySelector('.simulator-result');
             const amountDiv = simulator.querySelector('.simulator-result-amount');
             const detailsDiv = simulator.querySelector('.simulator-result-details');
@@ -817,8 +825,6 @@
             }
             
             resultDiv.classList.add('show');
-            simulator.querySelector('.simulator-next-btn').style.display = 'none';
-            simulator.querySelector('.simulator-prev-btn').style.display = 'none';
             
             const userData = {
                 prenom: this.responses.prenom,
