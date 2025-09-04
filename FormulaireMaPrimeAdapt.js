@@ -25,33 +25,16 @@
             }
 
             try {
-                // Événement principal de soumission
+                // Événement simple : 1 formulaire soumis = 1 conversion
                 window.dataLayer.push({
-                    'event': 'maprimeadapt_form_submit',
-                    'form_type': 'maprimeadapt_simulator',
-                    'eligible': userData.eligible,
-                    'user_age_group': this.responses.question_3,
-                    'user_status': this.responses.question_2,
-                    'conversion_value': userData.eligible ? (userData.eligibility.montant || 0) : 0,
-                    'timestamp': userData.timestamp
+                    'event': 'maprimeadapt_conversion',
+                    'form_name': 'maprimeadapt_simulator',
+                    'event_category': 'form',
+                    'event_action': 'submit',
+                    'event_label': 'maprimeadapt_form_completed'
                 });
 
-                // Événement spécifique selon éligibilité
-                if (userData.eligible) {
-                    window.dataLayer.push({
-                        'event': 'maprimeadapt_eligible',
-                        'conversion_category': userData.eligibility.categorie,
-                        'estimated_amount': userData.eligibility.montant,
-                        'aid_percentage': userData.eligibility.taux
-                    });
-                } else {
-                    window.dataLayer.push({
-                        'event': 'maprimeadapt_not_eligible',
-                        'ineligibility_reason': userData.eligibility.reason
-                    });
-                }
-
-                this.logDebug('Événements GTM déclenchés avec succès');
+                this.logDebug('Conversion GTM déclenchée');
                 
             } catch (error) {
                 this.logError('Erreur lors du déclenchement GTM:', error);
