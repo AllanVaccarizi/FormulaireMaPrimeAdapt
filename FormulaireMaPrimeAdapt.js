@@ -895,6 +895,7 @@
             // Données nettoyées (suppression des infos sensibles)
             const cleanUserData = {
                 ...userData,
+                eligible: userData.eligible ? 'Éligible' : 'Non éligible', // Conversion booléen vers texte
                 userAgent: 'browser', // Information générique
                 timestamp: userData.timestamp,
                 sessionId: userData.sessionId
