@@ -94,7 +94,7 @@
         webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/form',
         maxRetries: 3,
         timeout: 10000,
-        debug: true,
+        debug: false,
         theme: {
             primaryColor: '#3563a4',
             secondaryColor: '#5a7bc4',
