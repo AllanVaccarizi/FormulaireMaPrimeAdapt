@@ -94,12 +94,17 @@
         webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/form',
         maxRetries: 3,
         timeout: 10000,
-        debug: false, // Désactivé par défaut
+        debug: true,
         theme: {
             primaryColor: '#3563a4',
             secondaryColor: '#5a7bc4',
             backgroundLight: '#f0f4ff',
             borderRadius: '15px'
+        },
+        // AJOUTER cette section
+        googleAds: {
+            conversionId: 'AW-17329606398',
+            conversionLabel: 'sZM4CI6ouZgbEP6ds8dA'
         },
         callbacks: {
             onComplete: null,
@@ -839,39 +844,12 @@
             };
             
             this.sendData(userData);
-            
-            // Déclenchement Google Tag Manager
-            this.triggerGTMEvent(userData);
-            
+
             if (this.config.callbacks.onComplete) {
                 this.config.callbacks.onComplete(userData);
             }
         }
 
-        // Méthode pour déclencher les événements Google Tag Manager
-        triggerGTMEvent(userData) {
-            // Vérification que GTM est disponible
-            if (typeof window.dataLayer === 'undefined') {
-                this.logDebug('dataLayer GTM non disponible');
-                return;
-            }
-
-            try {
-                // Événement simple : 1 formulaire soumis = 1 conversion
-                window.dataLayer.push({
-                    'event': 'maprimeadapt_conversion',
-                    'form_name': 'maprimeadapt_simulator',
-                    'event_category': 'form',
-                    'event_action': 'submit',
-                    'event_label': 'maprimeadapt_form_completed'
-                });
-
-                this.logDebug('Conversion GTM déclenchée');
-                
-            } catch (error) {
-                this.logError('Erreur lors du déclenchement GTM:', error);
-            }
-        }
 
         sendData(userData) {
             if (!this.config.webhookUrl) {
@@ -927,8 +905,14 @@
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
+                
                 this.logDebug('Webhook envoyé avec succès');
                 this.retryCount = 0;
+                
+                // AJOUTER cette ligne
+                this.triggerConversionTracking(userData);
+                
+                return response;
             })
             .catch(error => {
                 clearTimeout(timeoutId);
@@ -941,6 +925,87 @@
                 }
             });
         }
+        // Nouvelle méthode consolidée pour le tracking après webhook réussi
+            triggerConversionTracking(userData) {
+                try {
+                    // 1. Tracking Google Tag Manager
+                    this.triggerGTMConversion(userData);
+                    
+                    // 2. Tracking Google Ads direct (si pas de GTM)
+                    this.triggerGoogleAdsConversion(userData);
+                    
+                    this.logDebug('Tracking de conversion déclenché après webhook réussi');
+                    
+                } catch (error) {
+                    this.logError('Erreur lors du tracking de conversion:', error);
+                }
+            }
+            // Méthode GTM mise à jour
+            triggerGTMConversion(userData) {
+                if (typeof window.dataLayer === 'undefined') {
+                    this.logDebug('dataLayer GTM non disponible');
+                    return;
+                }
+
+                try {
+                    window.dataLayer.push({
+                        'event': 'maprimeadapt_conversion',
+                        'google_ads_conversion_id': this.config.googleAds.conversionId,
+                        'google_ads_conversion_label': this.config.googleAds.conversionLabel,
+                        'google_ads_conversion_value': userData.eligible ? 1 : 0,
+                        'google_ads_conversion_currency': 'EUR',
+                        
+                        // Données enrichies
+                        'form_name': 'maprimeadapt_simulator',
+                        'eligibility_status': userData.eligible ? 'eligible' : 'non_eligible',
+                        'user_category': userData.eligibility?.categorie || 'unknown',
+                        'estimated_amount': userData.eligibility?.montant || 0,
+                        'webhook_success': true,
+                        
+                        // Événement GA4
+                        'event_category': 'form',
+                        'event_action': 'webhook_success',
+                        'event_label': 'maprimeadapt_lead_generated'
+                    });
+
+                    this.logDebug('Conversion GTM déclenchée après webhook');
+                    
+                } catch (error) {
+                    this.logError('Erreur GTM:', error);
+                }
+            }
+
+            // Méthode Google Ads direct mise à jour
+            triggerGoogleAdsConversion(userData) {
+                if (typeof window.gtag === 'undefined') {
+                    this.logDebug('gtag non disponible');
+                    return;
+                }
+
+                try {
+                    const conversionString = this.config.googleAds.conversionId + '/' + this.config.googleAds.conversionLabel;
+                    
+                    window.gtag('event', 'conversion', {
+                        'send_to': conversionString,
+                        'value': userData.eligible ? 1.0 : 0.0,
+                        'currency': 'EUR',
+                        'transaction_id': userData.sessionId,
+                        
+                        'custom_parameters': {
+                            'eligibility_status': userData.eligible ? 'eligible' : 'non_eligible',
+                            'user_category': userData.eligibility?.categorie || 'unknown',
+                            'estimated_amount': userData.eligibility?.montant || 0,
+                            'webhook_success': true,
+                            'user_age_group': userData.responses?.question_3 || 'unknown'
+                        }
+                    });
+
+                    this.logDebug('Conversion Google Ads directe déclenchée après webhook');
+                    
+                } catch (error) {
+                    this.logError('Erreur Google Ads direct:', error);
+                }
+            }
 
         // Méthodes utilitaires avec logique GIR
         nextQuestion() {
