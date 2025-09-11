@@ -1,5 +1,5 @@
-// Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR - Thème Bleu
-// Version: 1.3.0-blue
+// Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR - Thème Bleu - Revenus Dynamiques
+// Version: 1.3.1-dynamic-income
 // Usage: <script src="maprimeadapt-widget.js"></script>
 //        <div id="maprimeadapt-simulator"></div>
 
@@ -111,6 +111,16 @@
             onStep: null,
             onError: null
         }
+    };
+
+    // Nouvelles tranches de revenus par taille de foyer
+    const incomeThresholds = {
+        1: { low: 17173, high: 22015 },
+        2: { low: 25115, high: 32197 },
+        3: { low: 30206, high: 38719 },
+        4: { low: 35285, high: 45234 },
+        5: { low: 40388, high: 51775 },
+        6: { low: 45482, high: 58300 }
     };
 
     // CSS du simulateur avec couleurs bleues
@@ -501,15 +511,12 @@
                         </div>
                     </div>
 
-                    <!-- Question 6 -->
+                    <!-- Question 6 - Revenus dynamiques -->
                     <div class="simulator-question" data-question="6">
                         <h3 class="simulator-question-title">Vos revenus</h3>
                         <p class="simulator-question-subtitle">Revenu fiscal de référence total du foyer :</p>
-                        <div class="simulator-options">
-                            <div class="simulator-option" data-value="moins_20000">Moins de 20 000€</div>
-                            <div class="simulator-option" data-value="20000_30000">Entre 20 000€ et 30 000€</div>
-                            <div class="simulator-option" data-value="30000_40000">Entre 30 000€ et 40 000€</div>
-                            <div class="simulator-option" data-value="plus_40000">Plus de 40 000€</div>
+                        <div class="simulator-options" id="income-options">
+                            <!-- Les options seront générées dynamiquement -->
                         </div>
                     </div>
 
@@ -570,7 +577,7 @@
         </div>
     `;
 
-    // Classe principale sécurisée avec logique GIR
+    // Classe principale sécurisée avec logique GIR et revenus dynamiques
     class MaPrimeAdaptSimulator {
         constructor(config = {}) {
             this.config = Object.assign({}, defaultConfig, config);
@@ -636,6 +643,62 @@
             this.container.innerHTML = simulatorHTML;
         }
 
+        // Nouvelle méthode pour générer les options de revenus dynamiquement
+        generateIncomeOptions(householdSize) {
+            const simulator = this.container.querySelector('.maprimeadapt-simulator');
+            const incomeOptionsContainer = simulator.querySelector('#income-options');
+            
+            // Vide les options existantes
+            incomeOptionsContainer.innerHTML = '';
+            
+            // Utilise les seuils pour la taille du foyer (max 6)
+            const size = Math.min(parseInt(householdSize), 6);
+            const thresholds = incomeThresholds[size];
+            
+            // Formate les montants avec des espaces
+            const formatAmount = (amount) => amount.toLocaleString('fr-FR');
+            
+            // Crée les trois options
+            const options = [
+                {
+                    value: 'tranche_1',
+                    text: `Inférieur à ${formatAmount(thresholds.low)} €`
+                },
+                {
+                    value: 'tranche_2', 
+                    text: `Entre ${formatAmount(thresholds.low)} € et ${formatAmount(thresholds.high)} €`
+                },
+                {
+                    value: 'tranche_3',
+                    text: `Supérieur à ${formatAmount(thresholds.high)} €`
+                }
+            ];
+            
+            // Ajoute les options au DOM
+            options.forEach(option => {
+                const optionDiv = SecurityUtils.createSecureElement('div', option.text, 'simulator-option');
+                optionDiv.dataset.value = option.value;
+                incomeOptionsContainer.appendChild(optionDiv);
+                
+                // Ajoute l'événement click
+                optionDiv.addEventListener('click', (e) => {
+                    const questionDiv = e.target.closest('.simulator-question');
+                    const questionNum = questionDiv.dataset.question;
+                    
+                    questionDiv.querySelectorAll('.simulator-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    e.target.classList.add('selected');
+                    this.responses[`question_${questionNum}`] = SecurityUtils.sanitizeInput(e.target.dataset.value);
+                    
+                    if (this.config.callbacks.onStep) {
+                        this.config.callbacks.onStep(questionNum, e.target.dataset.value);
+                    }
+                });
+            });
+        }
+
         bindEvents() {
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
             
@@ -649,6 +712,24 @@
                         const selectedOptions = Array.from(questionDiv.querySelectorAll('.simulator-option.selected'))
                             .map(opt => SecurityUtils.sanitizeInput(opt.dataset.value));
                         this.responses[`question_${questionNum}`] = selectedOptions;
+                        return;
+                    }
+                    
+                    // Gestion spéciale pour la question 5 (nombre de personnes dans le foyer)
+                    if (questionNum === '5') {
+                        questionDiv.querySelectorAll('.simulator-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        
+                        e.target.classList.add('selected');
+                        this.responses[`question_${questionNum}`] = SecurityUtils.sanitizeInput(e.target.dataset.value);
+                        
+                        // Génère dynamiquement les options de revenus pour la question suivante
+                        this.generateIncomeOptions(e.target.dataset.value);
+                        
+                        if (this.config.callbacks.onStep) {
+                            this.config.callbacks.onStep(questionNum, e.target.dataset.value);
+                        }
                         return;
                     }
                     
@@ -837,6 +918,7 @@
                 email: this.responses.email,
                 telephone: this.responses.telephone,
                 eligible: eligibility.eligible,
+                taux_aide: eligibility.taux || null, // Nouveau champ pour le taux d'aide
                 eligibility: eligibility,
                 responses: this.responses,
                 timestamp: new Date().toISOString(),
@@ -885,6 +967,7 @@
             // Log sécurisé (sans données sensibles)
             this.logDebug('Envoi des données au webhook', {
                 eligible: userData.eligible,
+                taux_aide: userData.taux_aide,
                 timestamp: userData.timestamp
             });
 
@@ -960,7 +1043,7 @@
                         'form_name': 'maprimeadapt_simulator',
                         'eligibility_status': userData.eligible ? 'eligible' : 'non_eligible',
                         'user_category': userData.eligibility?.categorie || 'unknown',
-                        'estimated_amount': userData.eligibility?.montant || 0,
+                        'taux_aide': userData.taux_aide || 0,
                         'webhook_success': true,
                         
                         // Événement GA4
@@ -995,7 +1078,7 @@
                         'custom_parameters': {
                             'eligibility_status': userData.eligible ? 'eligible' : 'non_eligible',
                             'user_category': userData.eligibility?.categorie || 'unknown',
-                            'estimated_amount': userData.eligibility?.montant || 0,
+                            'taux_aide': userData.taux_aide || 0,
                             'webhook_success': true,
                             'user_age_group': userData.responses?.question_3 || 'unknown'
                         }
@@ -1155,6 +1238,7 @@
             return { eligible: true };
         }
 
+        // Nouvelle méthode de calcul d'éligibilité avec les tranches dynamiques
         calculateEligibility() {
             const eligibilityCheck = this.checkEligibility();
             
@@ -1164,7 +1248,7 @@
 
             const codePostal = this.responses.codePostal;
             const foyerSize = parseInt(this.responses.question_5);
-            const revenus = this.responses.question_6;
+            const revenuTranche = this.responses.question_6;
             
             // Validation supplémentaire côté calcul
             if (!codePostal || !SecurityUtils.validatePostalCode(codePostal)) {
@@ -1175,42 +1259,34 @@
                 return { eligible: false, reason: 'Taille de foyer invalide' };
             }
 
-            const idfCodes = ['75', '77', '78', '91', '92', '93', '94', '95'];
-            const isIleDeFrance = idfCodes.includes(codePostal.substring(0, 2));
-            
-            const plafonds = {
-                idf: {
-                    tres_modeste: [23768, 34884, 41893, 48914, 55961],
-                    modeste: [28933, 42463, 51000, 59549, 68123]
-                },
-                province: {
-                    tres_modeste: [17173, 25115, 30206, 35285, 40388],
-                    modeste: [22015, 32197, 38719, 45234, 51775]
-                }
-            };
-            
-            const region = isIleDeFrance ? 'idf' : 'province';
-            const plafondIndex = Math.min(foyerSize - 1, 4);
-            
-            let revenuEstime = 0;
-            switch(revenus) {
-                case 'moins_20000': revenuEstime = 18000; break;
-                case '20000_30000': revenuEstime = 25000; break;
-                case '30000_40000': revenuEstime = 35000; break;
-                case 'plus_40000': revenuEstime = 45000; break;
-                default: 
-                    return { eligible: false, reason: 'Tranche de revenus invalide' };
+            if (!revenuTranche) {
+                return { eligible: false, reason: 'Tranche de revenus non sélectionnée' };
             }
-            
-            const plafondTresModeste = plafonds[region].tres_modeste[plafondIndex];
-            const plafondModeste = plafonds[region].modeste[plafondIndex];
-            
-            if (revenuEstime <= plafondTresModeste) {
-                return { eligible: true, taux: 70, montant: 15400, categorie: 'très modeste' };
-            } else if (revenuEstime <= plafondModeste) {
-                return { eligible: true, taux: 50, montant: 11000, categorie: 'modeste' };
-            } else {
-                return { eligible: false, reason: 'Vos revenus dépassent les plafonds MaPrimeAdapt' };
+
+            // Nouvelle logique basée sur les tranches dynamiques
+            switch(revenuTranche) {
+                case 'tranche_1':
+                    return { 
+                        eligible: true, 
+                        taux: 70, 
+                        categorie: 'très modeste'
+                    };
+                case 'tranche_2':
+                    return { 
+                        eligible: true, 
+                        taux: 50, 
+                        categorie: 'modeste'
+                    };
+                case 'tranche_3':
+                    return { 
+                        eligible: false, 
+                        reason: 'Vos revenus dépassent les plafonds MaPrimeAdapt'
+                    };
+                default:
+                    return { 
+                        eligible: false, 
+                        reason: 'Tranche de revenus invalide' 
+                    };
             }
         }
 
@@ -1322,7 +1398,7 @@
             }
         },
         
-        version: '1.3.0-secure-gir-blue-gtm'
+        version: '1.3.1-dynamic-income'
     };
 
     // Auto-initialisation sécurisée
