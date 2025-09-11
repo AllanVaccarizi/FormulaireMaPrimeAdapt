@@ -845,9 +845,12 @@
             
             this.sendData(userData);
 
+            this.triggerConversionTracking(userData);
+
             if (this.config.callbacks.onComplete) {
                 this.config.callbacks.onComplete(userData);
             }
+
         }
 
 
@@ -909,8 +912,6 @@
                 this.logDebug('Webhook envoyé avec succès');
                 this.retryCount = 0;
                 
-                // AJOUTER cette ligne
-                this.triggerConversionTracking(userData);
                 
                 return response;
             })
