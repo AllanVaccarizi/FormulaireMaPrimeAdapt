@@ -91,7 +91,7 @@
     // Configuration par défaut (sécurisée) - Thème bleu
     const defaultConfig = {
         containerId: 'maprimeadapt-simulator',
-        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook-test/form',
+        webhookUrl: 'https://optimizehomeconseil.app.n8n.cloud/webhook/form',
         maxRetries: 3,
         timeout: 10000,
         debug: false,
