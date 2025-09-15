@@ -1411,7 +1411,10 @@
             const prevBtn = simulator.querySelector('.simulator-prev-btn');
             const nextBtn = simulator.querySelector('.simulator-next-btn');
             
-            prevBtn.style.display = this.currentQuestion > 1 ? 'block' : 'none';
+            // Logique corrigée pour le bouton précédent
+            // Afficher le bouton précédent sauf pour la première question
+            const shouldShowPrev = this.currentQuestion !== 1;
+            prevBtn.style.display = shouldShowPrev ? 'block' : 'none';
             
             if (this.currentQuestion === this.totalQuestions) {
                 nextBtn.textContent = 'Calculer mon estimation';
