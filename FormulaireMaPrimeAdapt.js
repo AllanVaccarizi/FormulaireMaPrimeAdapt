@@ -433,20 +433,6 @@
                 width: 100%;
             }
         }
-
-        @media (max-width: 768px) {
-            .simulator-content {
-                padding: 20px;
-            }
-            
-            .simulator-buttons {
-                flex-direction: column;
-            }
-            
-            .simulator-btn {
-                width: 100%;
-            }
-        }
     `;
 
     // Template HTML sécurisé avec question GIR et texte modifié
