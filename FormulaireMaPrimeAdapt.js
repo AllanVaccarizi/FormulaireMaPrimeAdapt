@@ -479,7 +479,6 @@
                             <div class="simulator-option" data-value="proprietaire">Propriétaire occupant</div>
                             <div class="simulator-option" data-value="locataire_prive">Locataire - logement privé</div>
                             <div class="simulator-option" data-value="locataire_social">Locataire - logement social</div>
-                            <div class="simulator-option" data-value="autre">Autre situation</div>
                         </div>
                     </div>
 
@@ -501,7 +500,6 @@
                         <div class="simulator-options">
                             <div class="simulator-option" data-value="oui">Oui (taux ≥ 50% ou PCH)</div>
                             <div class="simulator-option" data-value="non">Non</div>
-                            <div class="simulator-option" data-value="ne_sais_pas">Je ne sais pas</div>
                         </div>
                     </div>
 
