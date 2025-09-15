@@ -943,6 +943,8 @@
                 
             } else {
                 resultDiv.classList.add('ineligible');
+                // Changer le titre principal
+                simulator.querySelector('.simulator-result h3').textContent = 'Vous n\'êtes pas éligible';
                 amountDiv.textContent = 'Non éligible';
                 
                 const ineligibleP = SecurityUtils.createSecureElement('p', 
