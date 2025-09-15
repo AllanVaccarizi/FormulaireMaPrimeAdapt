@@ -600,12 +600,6 @@
                         <h3>Vous êtes éligible</h3>
                         <div class="simulator-result-amount">Calcul en cours...</div>
                         <div class="simulator-result-details"></div>
-                        <p style="margin-top: 15px; font-size: 16px; font-weight: 600;">
-                            Estimation détaillée envoyée par email
-                        </p>
-                        <p style="margin-top: 10px; font-size: 14px;">
-                            Nos conseillers vous contacteront bientôt pour vous accompagner dans votre projet
-                        </p>
                     </div>
 
                     <div class="simulator-buttons">
@@ -935,32 +929,60 @@
             
             if (eligibility.eligible) {
                 resultDiv.classList.remove('ineligible');
-                amountDiv.style.display = 'none'; // Cache le montant
                 
-                // Aucun contenu additionnel dans les détails - juste le message fixe
+                // Modifier le titre principal avec émoji
+                const titleElement = simulator.querySelector('.simulator-result h3');
+                titleElement.textContent = 'Vous êtes éligible à MaPrimeAdapt 🎉';
+                
+                // Cacher le montant
+                amountDiv.style.display = 'none';
+                
+                // Message email
+                const emailP = SecurityUtils.createSecureElement('p');
+                emailP.innerHTML = '📩 <strong>Une proposition personnalisée vous a été envoyée par email.</strong>';
+                detailsDiv.appendChild(emailP);
+                
+                // Message conseillers
+                const advisorsP = SecurityUtils.createSecureElement('p');
+                advisorsP.innerHTML = '📞 <strong>Nos conseillers vous contacteront très prochainement pour vous accompagner pas à pas dans la réalisation de votre projet d\'adaptation de logement.</strong>';
+                detailsDiv.appendChild(advisorsP);
+                
+                // Message encouragement
+                const launchP = SecurityUtils.createSecureElement('p');
+                launchP.innerHTML = '➡️ <strong>Votre démarche est lancée, nous nous occupons du reste !</strong>';
+                detailsDiv.appendChild(launchP);
                 
             } else {
                 resultDiv.classList.add('ineligible');
                 
-                // Modifier le titre principal pour inclure "à MaPrimeAdapt"
+                // Modifier le titre principal
                 const titleElement = simulator.querySelector('.simulator-result h3');
-                titleElement.textContent = 'Vous n\'êtes pas éligible à MaPrimeAdapt';
+                titleElement.textContent = 'Non éligible à MaPrimeAdapt';
                 
                 // Cacher complètement le montant
                 amountDiv.style.display = 'none';
                 
-                // Ajouter seulement la raison
-                const reasonP = SecurityUtils.createSecureElement('p');
-                const reasonStrong = SecurityUtils.createSecureElement('strong', 'Raison : ');
-                reasonP.appendChild(reasonStrong);
-                reasonP.appendChild(document.createTextNode(eligibility.reason));
-                detailsDiv.appendChild(reasonP);
+                // Message principal avec émoji
+                const mainMessageP = SecurityUtils.createSecureElement('p');
+                mainMessageP.innerHTML = '👉 <strong>Vous ne répondez pas aux critères de MaPrimeAdapt</strong> - ' + SecurityUtils.escapeHtml(eligibility.reason);
+                detailsDiv.appendChild(mainMessageP);
                 
-                // Ajouter les alternatives
-                const alternativeP = SecurityUtils.createSecureElement('p', 
-                    'D\'autres aides peuvent exister (crédit d\'impôt, aides locales, aides des caisses de retraite)');
-                detailsDiv.appendChild(alternativeP);
+                // Message email
+                const emailP = SecurityUtils.createSecureElement('p');
+                emailP.innerHTML = '📩 <strong>Une proposition adaptée à votre situation vous a été envoyée par email.</strong>';
+                detailsDiv.appendChild(emailP);
+                
+                // Message conseillers
+                const advisorsP = SecurityUtils.createSecureElement('p');
+                advisorsP.innerHTML = '📞 <strong>Nos conseillers vont vous recontacter rapidement afin d\'étudier avec vous les solutions possibles pour concrétiser votre projet d\'adaptation de logement.</strong>';
+                detailsDiv.appendChild(advisorsP);
+                
+                // Message encouragement
+                const encouragementP = SecurityUtils.createSecureElement('p');
+                encouragementP.innerHTML = '➡️ <strong>Votre projet reste réalisable : nous sommes là pour vous accompagner.</strong>';
+                detailsDiv.appendChild(encouragementP);
             }
+
             
             resultDiv.classList.add('show');
             
