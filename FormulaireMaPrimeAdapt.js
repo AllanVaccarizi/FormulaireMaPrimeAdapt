@@ -123,6 +123,18 @@
         6: { low: 45482, high: 58300 }
     };
 
+    // Texte officiel du consentement RGPD
+    const TEXTE_CONSENTEMENT_OFFICIEL = "J'accepte que mes données soient utilisées par Optimize Home Conseil et transmises à ses partenaires commerciaux dans le cadre de la mise en relation pour des services liés à l'adaptation du logement.";
+
+    // Métadonnées RGPD
+    const RGPD_METADATA = {
+        responsable_traitement: "Optimize Home Conseil",
+        base_legale: "Consentement (Art. 6.1.a RGPD)",
+        finalites: "Mise en relation commerciale - services adaptation logement",
+        duree_conservation: "3 ans après dernière interaction",
+        version_widget: "1.3.1-dynamic-income"
+    };
+
     // CSS du simulateur avec couleurs bleues
     const simulatorCSS = `
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
@@ -961,7 +973,23 @@
                 eligibility: eligibility,
                 responses: this.responses,
                 timestamp: new Date().toISOString(),
-                sessionId: SecurityUtils.generateSessionId()
+                sessionId: SecurityUtils.generateSessionId(),
+                // Nouvelles données RGPD
+                rgpd_data: {
+                    id_unique: 'CONS_' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '_' + SecurityUtils.generateSessionId().slice(0,8),
+                    identite_complete: this.responses.prenom + ' ' + this.responses.nom + ' - ' + this.responses.email,
+                    texte_consentement: TEXTE_CONSENTEMENT_OFFICIEL,
+                    action_consentement: "Case cochée volontairement",
+                    finalites_traitement: RGPD_METADATA.finalites,
+                    duree_conservation: RGPD_METADATA.duree_conservation,
+                    statut_consentement: "Actif",
+                    base_legale: RGPD_METADATA.base_legale,
+                    responsable_traitement: RGPD_METADATA.responsable_traitement,
+                    user_agent_complet: navigator.userAgent,
+                    url_page: window.location.href,
+                    referrer: document.referrer || 'Direct',
+                    version_widget: RGPD_METADATA.version_widget
+                }
             };
             
             this.sendData(userData);
@@ -995,12 +1023,15 @@
             }
 
             // Données nettoyées (suppression des infos sensibles)
-            const cleanUserData = {
+           const cleanUserData = {
                 ...userData,
-                eligible: userData.eligible ? 'Éligible' : 'Non éligible', // Conversion booléen vers texte
-                userAgent: 'browser', // Information générique
+                eligible: userData.eligible ? 'Éligible' : 'Non éligible',
+                consentement: userData.consentement || false,
+                userAgent: 'browser',
                 timestamp: userData.timestamp,
-                sessionId: userData.sessionId
+                sessionId: userData.sessionId,
+                // Conservation des données RGPD pour le registre
+                rgpd_data: userData.rgpd_data
             };
 
             // Log sécurisé (sans données sensibles)
