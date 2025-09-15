@@ -131,7 +131,7 @@
         responsable_traitement: "Optimize Home Conseil",
         base_legale: "Consentement (Art. 6.1.a RGPD)",
         finalites: "Mise en relation commerciale - services adaptation logement",
-        duree_conservation: "3 ans après dernière interaction",
+        duree_conservation: "3 ans après complétion du formulaire Ma Prime Adapt",
         version_widget: "1.3.1-dynamic-income"
     };
 
