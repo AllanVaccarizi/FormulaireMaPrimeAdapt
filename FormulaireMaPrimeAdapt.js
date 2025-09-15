@@ -397,6 +397,43 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .simulator-checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            font-size: 13px;
+            line-height: 1.4;
+            cursor: pointer;
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+
+        .simulator-checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            margin-top: 2px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .simulator-checkbox-container input[type="checkbox"]:focus {
+            outline: 2px solid var(--maprimeadapt-primary, #3563a4);
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .simulator-content {
+                padding: 20px;
+            }
+            
+            .simulator-buttons {
+                flex-direction: column;
+            }
+            
+            .simulator-btn {
+                width: 100%;
+            }
+        }
+
         @media (max-width: 768px) {
             .simulator-content {
                 padding: 20px;
@@ -552,6 +589,13 @@
                         <div class="simulator-input-group">
                             <label for="sim-telephone">Numéro de téléphone :</label>
                             <input type="tel" id="sim-telephone" placeholder="06 12 34 56 78" required maxlength="14" autocomplete="tel">
+                        </div>
+                        <div class="simulator-input-group">
+                            <label class="simulator-checkbox-container">
+                                <input type="checkbox" id="sim-consentement" required>
+                                <span class="simulator-checkmark"></span>
+                                J'accepte que mes données soient utilisées par Optimize Home Conseil et transmises à ses partenaires commerciaux dans le cadre de la mise en relation pour des services liés à l'adaptation du logement.
+                            </label>
                         </div>
                     </div>
 
@@ -840,12 +884,20 @@
                     this.showValidationError('Numéro de téléphone français invalide');
                     return false;
                 }
-                
+
+                const consentement = simulator.querySelector('#sim-consentement').checked;
+
+                if (!consentement) {
+                    this.showValidationError('Vous devez accepter l\'utilisation de vos données pour continuer');
+                    return false;
+                }
+
                 this.responses.prenom = prenom;
                 this.responses.nom = nom;
                 this.responses.email = email;
                 this.responses.telephone = telephone;
-                
+                this.responses.consentement = consentement;
+
                 return true;
             }
 
@@ -917,8 +969,9 @@
                 nom: this.responses.nom,
                 email: this.responses.email,
                 telephone: this.responses.telephone,
+                consentement: this.responses.consentement,
                 eligible: eligibility.eligible,
-                taux_aide: eligibility.taux || null, // Nouveau champ pour le taux d'aide
+                taux_aide: eligibility.taux || null,
                 eligibility: eligibility,
                 responses: this.responses,
                 timestamp: new Date().toISOString(),
