@@ -972,7 +972,7 @@
                 taux_aide: eligibility.taux || null,
                 eligibility: eligibility,
                 responses: this.responses,
-                timestamp: new Date().toISOString(),
+                timestamp: new Date().toISOString().split('T')[0], // Format : 2025-09-15
                 sessionId: SecurityUtils.generateSessionId(),
                 // Nouvelles données RGPD
                 rgpd_data: {
