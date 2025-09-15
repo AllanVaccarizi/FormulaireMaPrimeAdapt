@@ -943,20 +943,22 @@
                 
             } else {
                 resultDiv.classList.add('ineligible');
-                // Changer le titre principal
-                simulator.querySelector('.simulator-result h3').textContent = 'Vous n\'êtes pas éligible';
-                amountDiv.textContent = 'Non éligible';
                 
-                const ineligibleP = SecurityUtils.createSecureElement('p', 
-                    'Vous n\'êtes pas éligible à MaPrimeAdapt');
-                detailsDiv.appendChild(ineligibleP);
+                // Modifier le titre principal pour inclure "à MaPrimeAdapt"
+                const titleElement = simulator.querySelector('.simulator-result h3');
+                titleElement.textContent = 'Vous n\'êtes pas éligible à MaPrimeAdapt';
                 
+                // Cacher complètement le montant
+                amountDiv.style.display = 'none';
+                
+                // Ajouter seulement la raison
                 const reasonP = SecurityUtils.createSecureElement('p');
                 const reasonStrong = SecurityUtils.createSecureElement('strong', 'Raison : ');
                 reasonP.appendChild(reasonStrong);
                 reasonP.appendChild(document.createTextNode(eligibility.reason));
                 detailsDiv.appendChild(reasonP);
                 
+                // Ajouter les alternatives
                 const alternativeP = SecurityUtils.createSecureElement('p', 
                     'D\'autres aides peuvent exister (crédit d\'impôt, aides locales, aides des caisses de retraite)');
                 detailsDiv.appendChild(alternativeP);
