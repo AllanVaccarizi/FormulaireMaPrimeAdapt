@@ -1,5 +1,5 @@
 // Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR - Thème Bleu - Revenus Dynamiques
-// Version: 1.3.1-dynamic-income
+// Version: 1.3.2-fixed
 // Usage: <script src="maprimeadapt-widget.js"></script>
 //        <div id="maprimeadapt-simulator"></div>
 
@@ -132,7 +132,7 @@
         base_legale: "Consentement (Art. 6.1.a RGPD)",
         finalites: "Mise en relation commerciale - services adaptation logement",
         duree_conservation: "3 ans après complétion du formulaire Ma Prime Adapt",
-        version_widget: "1.3.1-dynamic-income"
+        version_widget: "1.3.2-fixed"
     };
 
     // CSS du simulateur avec couleurs bleues
@@ -908,6 +908,33 @@
             return true;
         }
 
+        // NOUVEAU: Méthode pour calculer le statut de l'éligibilité mail
+        calculateMailEligibility() {
+            const eligibility = this.calculateEligibility();
+            const age = this.responses.question_3;
+            const handicap = this.responses.question_4;
+            const gir = this.responses.question_4b;
+            
+            // Cas spécial pour les 60-69 ans sans handicap confirmé
+            if (age === '60_69' && (handicap === 'non' || handicap === 'ne_sais_pas')) {
+                // Si la personne a un GIR évalué (1-2, 3-4, ou 5-6) : Attente document
+                if (gir === 'gir_1_2' || gir === 'gir_3_4' || gir === 'gir_5_6') {
+                    return "Attente document";
+                }
+                // Si la personne n'a pas été évaluée : non éligible
+                if (gir === 'pas_evalue' || !gir) {
+                    return "non éligible";
+                }
+            }
+            
+            // Pour tous les autres cas : suivre l'éligibilité globale
+            if (eligibility.eligible) {
+                return "éligible";
+            } else {
+                return "non éligible";
+            }
+        }
+
         showResult() {
             const simulator = this.container.querySelector('.maprimeadapt-simulator');
             const eligibility = this.calculateEligibility();
@@ -996,6 +1023,8 @@
                 consentement: this.responses.consentement,
                 eligible: eligibility.eligible,
                 taux_aide: eligibility.taux || null,
+                // NOUVEAU: Ajout du champ mail
+                mail: this.calculateMailEligibility(),
                 eligibility: eligibility,
                 responses: this.responses,
                 timestamp: (() => {
@@ -1070,6 +1099,7 @@
             this.logDebug('Envoi des données au webhook', {
                 eligible: userData.eligible,
                 taux_aide: userData.taux_aide,
+                mail: userData.mail,
                 timestamp: userData.timestamp
             });
 
@@ -1224,25 +1254,36 @@
             this.showQuestion();
         }
 
+        // CORRECTION: Méthode previousQuestion corrigée
         previousQuestion() {
-            if (this.currentQuestion > 1) {
-                // Logique de retour en arrière
-                if (this.currentQuestion === 5) {
-                    // Depuis question 5, retourner vers 4b ou 4 selon le cas
-                    if (this.shouldShowGirQuestion() && this.responses.question_4b) {
-                        this.currentQuestion = '4b';
-                    } else if (this.responses.question_3 === '70_plus') {
-                        this.currentQuestion = 3;
-                    } else {
-                        this.currentQuestion = 4;
-                    }
-                } else if (this.currentQuestion === '4b') {
-                    this.currentQuestion = 4;
-                } else {
-                    this.currentQuestion--;
-                }
-                this.showQuestion();
+            if (this.currentQuestion <= 1) {
+                return; // Pas de retour en arrière depuis la première question
             }
+            
+            // Logique de retour en arrière corrigée
+            if (this.currentQuestion === 5) {
+                // Depuis question 5, retourner vers 4b si elle était affichée, sinon vers 4 ou 3
+                if (this.shouldShowGirQuestion() && this.responses.question_4b) {
+                    this.currentQuestion = '4b';
+                } else if (this.responses.question_3 === '70_plus') {
+                    // Les 70+ sautent les questions 4 et 4b
+                    this.currentQuestion = 3;
+                } else {
+                    // Retour vers question 4
+                    this.currentQuestion = 4;
+                }
+            } else if (this.currentQuestion === '4b') {
+                // Depuis 4b, retourner vers 4
+                this.currentQuestion = 4;
+            } else if (typeof this.currentQuestion === 'string') {
+                // Si on est sur une question string (comme '4b'), convertir en number
+                this.currentQuestion = parseInt(this.currentQuestion.replace(/[^0-9]/g, '')) || 1;
+            } else {
+                // Navigation standard
+                this.currentQuestion--;
+            }
+            
+            this.showQuestion();
         }
 
         showQuestion() {
@@ -1503,7 +1544,7 @@
             }
         },
         
-        version: '1.3.1-dynamic-income'
+        version: '1.3.2-fixed'
     };
 
     // Auto-initialisation sécurisée
