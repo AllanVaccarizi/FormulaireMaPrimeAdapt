@@ -1,5 +1,5 @@
 // Widget MaPrimeAdapt Embeddable - Version Sécurisée avec GIR - Thème Bleu - Revenus Dynamiques
-// Version: 1.3.2-fixed
+// Version: 1.3.3-sans-google-ads
 // Usage: <script src="maprimeadapt-widget.js"></script>
 //        <div id="maprimeadapt-simulator"></div>
 
@@ -101,11 +101,6 @@
             backgroundLight: '#f0f4ff',
             borderRadius: '15px'
         },
-        // AJOUTER cette section
-        googleAds: {
-            conversionId: 'AW-17329606398',
-            conversionLabel: 'sZM4CI6ouZgbEP6ds8dA'
-        },
         callbacks: {
             onComplete: null,
             onStep: null,
@@ -132,7 +127,7 @@
         base_legale: "Consentement (Art. 6.1.a RGPD)",
         finalites: "Mise en relation commerciale - services adaptation logement",
         duree_conservation: "3 ans après complétion du formulaire Ma Prime Adapt",
-        version_widget: "1.3.2-fixed"
+        version_widget: "1.3.3-sans-google-ads"
     };
 
     // CSS du simulateur avec couleurs bleues
@@ -1063,167 +1058,76 @@
 
 
         sendData(userData) {
-                if (!this.config.webhookUrl) {
-                    this.logDebug('Aucun webhook configuré');
-                    return;
-                }
-
-                // Validation URL plus stricte
-                let webhookUrl;
-                try {
-                    webhookUrl = new URL(this.config.webhookUrl);
-                    if (webhookUrl.protocol !== 'https:' && location.protocol === 'https:') {
-                        throw new Error('Webhook doit être HTTPS');
-                    }
-                } catch (error) {
-                    this.logError('URL de webhook invalide:', error.message);
-                    return;
-                }
-
-                const cleanUserData = {
-                    ...userData,
-                    eligible: userData.eligible ? 'Éligible' : 'Non éligible',
-                    consentement: userData.consentement || false,
-                    userAgent: 'browser',
-                    timestamp: userData.timestamp,
-                    sessionId: userData.sessionId,
-                    rgpd_data: userData.rgpd_data
-                };
-
-                this.logDebug('Envoi des données au webhook', {
-                    eligible: userData.eligible,
-                    taux_aide: userData.taux_aide,
-                    mail: userData.mail,
-                    timestamp: userData.timestamp
-                });
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
-
-                fetch(webhookUrl.href, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(cleanUserData),
-                    signal: controller.signal,
-                    credentials: 'omit',
-                    referrerPolicy: 'no-referrer'
-                })
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    
-                    this.logDebug('Webhook envoyé avec succès');
-                    this.retryCount = 0;
-                    
-                    // ✅ DÉCLENCHER LA CONVERSION SEULEMENT APRÈS SUCCÈS DU WEBHOOK
-                    this.triggerConversionTracking(userData);
-                    
-                    return response;
-                })
-                .catch(error => {
-                    clearTimeout(timeoutId);
-                    this.logError('Erreur webhook:', error.name);
-                    
-                    // ❌ NE PAS déclencher de conversion en cas d'erreur
-                    if (this.retryCount < this.config.maxRetries && error.name !== 'AbortError') {
-                        this.retryCount++;
-                        setTimeout(() => this.sendData(userData), 
-                            Math.min(2000 * Math.pow(2, this.retryCount), 10000));
-                    }
-                });
-            }
-        // Nouvelle méthode consolidée pour le tracking après webhook réussi
-            triggerConversionTracking(userData) {
-                try {
-                    // 1. Tracking Google Tag Manager
-                    this.triggerGTMConversion(userData);
-                    
-                    // 2. Tracking Google Ads direct (si pas de GTM)
-                    this.triggerGoogleAdsConversion(userData);
-                    
-                    this.logDebug('Tracking de conversion déclenché après webhook réussi');
-                    
-                } catch (error) {
-                    this.logError('Erreur lors du tracking de conversion:', error);
-                }
-            }
-            // Méthode GTM mise à jour
-            triggerGTMConversion(userData) {
-                if (typeof window.dataLayer === 'undefined') {
-                    this.logDebug('dataLayer GTM non disponible');
-                    return;
-                }
-
-                try {
-                    window.dataLayer.push({
-                        'event': 'maprimeadapt_conversion',
-                        'google_ads_conversion_id': this.config.googleAds.conversionId,
-                        'google_ads_conversion_label': this.config.googleAds.conversionLabel,
-                        'google_ads_conversion_value': userData.eligible ? 1 : 0,
-                        'google_ads_conversion_currency': 'EUR',
-                        
-                        // Données enrichies
-                        'form_name': 'maprimeadapt_simulator',
-                        'eligibility_status': userData.eligible ? 'eligible' : 'non_eligible',
-                        'user_category': userData.eligibility?.categorie || 'unknown',
-                        'taux_aide': userData.taux_aide || 0,
-                        'webhook_success': true,
-                        
-                        // Événement GA4
-                        'event_category': 'form',
-                        'event_action': 'webhook_success',
-                        'event_label': 'maprimeadapt_lead_generated'
-                    });
-
-                    this.logDebug('Conversion GTM déclenchée après webhook');
-                    
-                } catch (error) {
-                    this.logError('Erreur GTM:', error);
-                }
+            if (!this.config.webhookUrl) {
+                this.logDebug('Aucun webhook configuré');
+                return;
             }
 
-            // Méthode Google Ads direct mise à jour
-            triggerGoogleAdsConversion(userData) {
-        // Vérifier que gtag existe
-        if (typeof window.gtag !== 'function') {
-            this.logError('gtag non disponible - Vérifiez que le Global Site Tag est bien installé sur votre site');
-            console.error('ERREUR CRITIQUE: Le Global Site Tag Google Ads n\'est pas chargé. Ajoutez-le dans le <head> de votre page.');
-            return;
+            // Validation URL plus stricte
+            let webhookUrl;
+            try {
+                webhookUrl = new URL(this.config.webhookUrl);
+                if (webhookUrl.protocol !== 'https:' && location.protocol === 'https:') {
+                    throw new Error('Webhook doit être HTTPS');
+                }
+            } catch (error) {
+                this.logError('URL de webhook invalide:', error.message);
+                return;
+            }
+
+            const cleanUserData = {
+                ...userData,
+                eligible: userData.eligible ? 'Éligible' : 'Non éligible',
+                consentement: userData.consentement || false,
+                userAgent: 'browser',
+                timestamp: userData.timestamp,
+                sessionId: userData.sessionId,
+                rgpd_data: userData.rgpd_data
+            };
+
+            this.logDebug('Envoi des données au webhook', {
+                eligible: userData.eligible,
+                taux_aide: userData.taux_aide,
+                mail: userData.mail,
+                timestamp: userData.timestamp
+            });
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+            fetch(webhookUrl.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(cleanUserData),
+                signal: controller.signal,
+                credentials: 'omit',
+                referrerPolicy: 'no-referrer'
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                this.logDebug('Webhook envoyé avec succès');
+                this.retryCount = 0;
+                
+                return response;
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                this.logError('Erreur webhook:', error.name);
+                
+                if (this.retryCount < this.config.maxRetries && error.name !== 'AbortError') {
+                    this.retryCount++;
+                    setTimeout(() => this.sendData(userData), 
+                        Math.min(2000 * Math.pow(2, this.retryCount), 10000));
+                }
+            });
         }
-
-        try {
-            const conversionString = this.config.googleAds.conversionId + '/' + this.config.googleAds.conversionLabel;
-            
-            // Déclencher la conversion
-            window.gtag('event', 'conversion', {
-                'send_to': conversionString,
-                'value': userData.eligible ? 1.0 : 0.0,
-                'currency': 'EUR',
-                'transaction_id': userData.sessionId
-            });
-
-            this.logDebug('✅ Conversion Google Ads déclenchée', {
-                conversion_id: conversionString,
-                transaction_id: userData.sessionId,
-                value: userData.eligible ? 1.0 : 0.0
-            });
-
-            console.log('✅ CONVERSION GOOGLE ADS ENVOYÉE:', {
-                send_to: conversionString,
-                transaction_id: userData.sessionId,
-                eligible: userData.eligible
-            });
-            
-        } catch (error) {
-            this.logError('❌ Erreur lors du déclenchement de la conversion Google Ads:', error);
-            console.error('❌ ERREUR CONVERSION:', error);
-        }
-    }
 
         // Méthodes utilitaires avec logique GIR
         nextQuestion() {
@@ -1518,38 +1422,6 @@
             
             return { isValid, checks };
         }
-        checkGoogleAdsSetup() {
-            const checks = {
-                gtagExists: typeof window.gtag === 'function',
-                dataLayerExists: Array.isArray(window.dataLayer),
-                conversionId: this.config.googleAds?.conversionId || 'NON CONFIGURÉ',
-                conversionLabel: this.config.googleAds?.conversionLabel || 'NON CONFIGURÉ'
-            };
-            
-            console.group('🔍 DIAGNOSTIC GOOGLE ADS');
-            console.log('gtag disponible:', checks.gtagExists ? '✅' : '❌');
-            console.log('dataLayer disponible:', checks.dataLayerExists ? '✅' : '❌');
-            console.log('Conversion ID:', checks.conversionId);
-            console.log('Conversion Label:', checks.conversionLabel);
-            
-            if (!checks.gtagExists) {
-                console.error('⚠️ PROBLÈME: Le Global Site Tag n\'est pas chargé !');
-                console.log('📋 SOLUTION: Ajoutez ce code dans le <head> de votre page:');
-                console.log(`
-                <script async src="https://www.googletagmanager.com/gtag/js?id=${checks.conversionId}"></script>
-                <script>
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${checks.conversionId}');
-                </script>
-                `);
-            }
-            
-            console.groupEnd();
-            return checks;
-        }
-        
     }
     
 
@@ -1579,7 +1451,7 @@
             }
         },
         
-        version: '1.3.2-fixed'
+        version: '1.3.3-sans-google-ads'
     };
 
     // Auto-initialisation sécurisée
