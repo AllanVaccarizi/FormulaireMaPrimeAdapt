@@ -108,14 +108,14 @@
         }
     };
 
-    // Nouvelles tranches de revenus par taille de foyer
+    // Nouvelles tranches de revenus par taille de foyer - Barème 2026 Hors Île-de-France
     const incomeThresholds = {
-        1: { low: 17173, high: 22015 },
-        2: { low: 25115, high: 32197 },
-        3: { low: 30206, high: 38719 },
-        4: { low: 35285, high: 45234 },
-        5: { low: 40388, high: 51775 },
-        6: { low: 45482, high: 58300 }
+        1: { low: 17363, high: 22259 },
+        2: { low: 25393, high: 32553 },
+        3: { low: 30540, high: 39148 },
+        4: { low: 35676, high: 45735 },
+        5: { low: 40835, high: 52348 },
+        6: { low: 45986, high: 58946 }  // 5 personnes + 1 personne supplémentaire
     };
 
     // Texte officiel du consentement RGPD
