@@ -433,6 +433,25 @@
             outline-offset: 2px;
         }
 
+        .simulator-input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            background: white;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .simulator-input-group textarea:focus {
+            outline: none;
+            border-color: var(--maprimeadapt-primary, #3563a4);
+        }
+
         @media (max-width: 768px) {
             .simulator-content {
                 padding: 20px;
@@ -588,6 +607,10 @@
                         <div class="simulator-input-group">
                             <label for="sim-telephone">Numéro de téléphone :</label>
                             <input type="tel" id="sim-telephone" placeholder="06 12 34 56 78" required maxlength="14" autocomplete="tel">
+                        </div>
+                        <div class="simulator-input-group">
+                            <label for="sim-commentaire">Commentaire (facultatif) :</label>
+                            <textarea id="sim-commentaire" placeholder="Décrivez votre projet ou ajoutez des précisions..." maxlength="500"></textarea>
                         </div>
                         <div class="simulator-input-group">
                             <label class="simulator-checkbox-container">
@@ -885,10 +908,13 @@
                     return false;
                 }
 
+                const commentaire = SecurityUtils.sanitizeInput(simulator.querySelector('#sim-commentaire').value || '');
+
                 this.responses.prenom = prenom;
                 this.responses.nom = nom;
                 this.responses.email = email;
                 this.responses.telephone = telephone;
+                this.responses.commentaire = commentaire;
                 this.responses.consentement = consentement;
 
                 return true;
@@ -899,7 +925,7 @@
                 this.logError('Question introuvable:', this.currentQuestion);
                 return false;
             }
-            
+
             const selectedOption = currentQuestionDiv.querySelector('.simulator-option.selected');
             if (!selectedOption) {
                 this.showValidationError('Veuillez sélectionner une option');
@@ -1021,6 +1047,7 @@
                 nom: this.responses.nom,
                 email: this.responses.email,
                 telephone: this.responses.telephone,
+                commentaire: this.responses.commentaire || '',
                 consentement: this.responses.consentement,
                 eligible: eligibility.eligible,
                 taux_aide: eligibility.taux || null,
